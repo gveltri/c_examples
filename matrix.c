@@ -13,55 +13,57 @@ const int PADDING = 1;
 const int PRECISION = 2;
 const char *FORMATTING  = "%.2f";
 
-/* base matrix types */
-void valueMatrix(float value, Matrix matrix) {
-  for (int i=0;i<matrix->n;i++) {
-    matrix->values[i] = malloc(matrix->m*sizeof(float));
-    for (int j=0;j<matrix->m;j++) {
-      matrix->values[i][j] = value;
-    }
-  }
-}
 
-void identityMatrix(float value, Matrix matrix) {
+void allocValues(float value, char type, Matrix matrix) {
   for (int i=0;i<matrix->n;i++) {
     matrix->values[i] = malloc(matrix->m*sizeof(float));
     for (int j=0;j<matrix->m;j++) {
-      if (i == j)
+
+      /* base matrix types */
+      switch (type) {
+      case 'V':
         matrix->values[i][j] = value;
-      else
-        matrix->values[i][j] = 0;
+        break;
+      case 'I':
+        if (i == j)
+          matrix->values[i][j] = value;
+        else
+          matrix->values[i][j] = 0;
+        break;
+      case 'U':
+        if (i <= j)
+          matrix->values[i][j] = value;
+        else
+          matrix->values[i][j] = 0;
+        break;
+      case 'L':
+        if (i >= j)
+          matrix->values[i][j] = value;
+        else
+          matrix->values[i][j] = 0;
+        break;
+      }
+
     }
   }
 }
 
 Matrix makeMatrix(int n, int m, char type, float scalar) {
-
   Matrix matrix = malloc(sizeof(struct _Matrix_));
 
   matrix->n = n;
   matrix->m = m;
-
   matrix->values = malloc(n*sizeof(float*));
-  switch(type) {
-  case 'V':
-    valueMatrix(scalar, matrix);
-    break;
-  case 'I':
-    identityMatrix(scalar, matrix);
-    break;
-  default:
-    break;
-  }
+  allocValues(scalar, type, matrix);
 
   return matrix;
-
 }
 
 void freeMatrix(Matrix matrix) {
   for (int i; i<matrix->n; i++) {
     free(matrix->values[i]);
   }
+
   free(matrix->values);
   free(matrix);
 }
@@ -73,6 +75,7 @@ float maxValue(int m, float *array) {
     if (max < array[i])
       max = array[i];
   }
+
   return max;
 }
 
@@ -104,7 +107,9 @@ int numDigits(int n) {
 
 int numDigitsFloat(float x) {
   int n = floor(x);
+
   n = numDigits(n);
+
   return n;
 }
 
@@ -136,6 +141,7 @@ void draw2DMatrix(Matrix matrix) {
       }
     }
   }
+
   printf("\n");
   for (int i=0; i<(max_width*matrix->m); i++) {
     printf("-");
@@ -150,7 +156,7 @@ Matrix multiplyMatrices(Matrix matrix1, Matrix matrix2) {
 
   for (int i=0; i<matrix1->n; i++) {
     for (int j=0; j<matrix2->m; j++) {
-      int value = 0;
+      float value = 0;
       for (int k=0; k<matrix1->m; k++) {
         value = value + (matrix1->values[i][k] * matrix2->values[k][j]);
       }
