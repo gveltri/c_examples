@@ -22,6 +22,14 @@ int main() {
   freeMatrix(matrix2);
   freeMatrix(matrix3);
 
+  float x = 2;
+
+  float vec1[5] = {x,x,x,x,x};
+  float vec2[5] = {x,x,x,x,x};
+
+  x = dotProduct(5, vec1, vec2);
+
+  printf("%.6f", x);
   return 0;
 }
 

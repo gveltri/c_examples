@@ -16,5 +16,6 @@ void freeMatrix(Matrix matrix);
 float matrixMax(Matrix matrix);
 void draw2DMatrix(Matrix matrix);
 Matrix multiplyMatrices(Matrix matrix1, Matrix matrix2);
+float dotProduct(int n, float *vector1, float *vector2);
 
 #endif

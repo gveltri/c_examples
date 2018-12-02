@@ -79,6 +79,17 @@ float maxValue(int m, float *array) {
   return max;
 }
 
+float dotProduct(int n, float *vector1, float *vector2) {
+  float x = 0;
+
+  for (int i=0; i<n; i++) {
+    x = x + (vector1[i] * vector2[i]);
+  }
+
+
+  return x;
+}
+
 float matrixMax(Matrix matrix) {
   float max = maxValue(matrix->m, matrix->values[0]);
 
