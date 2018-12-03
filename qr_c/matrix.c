@@ -1,5 +1,5 @@
 /*
-  @file matrix.c
+  @file
   @author Gerardo Veltri
   Base matrix functions
 */
@@ -59,6 +59,31 @@ Matrix makeMatrix(int n, int m, char type, float scalar) {
   return matrix;
 }
 
+Matrix copyMatrix(Matrix matrix) {
+  Matrix new = malloc(sizeof(struct _Matrix_));
+
+  new->n = matrix->n;
+  new->m = matrix->m;
+  new->values = malloc(new->n*sizeof(float*));
+  for (int i=0;i<new->n;i++) {
+    new->values[i] = malloc(new->m*sizeof(float));
+    for (int j=0;j<new->m;j++) {
+      new->values[i][j] = matrix->values[i][j];
+    }
+  }
+
+  return new;
+}
+
+void scaleMatrix(Matrix matrix, float scalar) {
+  for (int i=0;i<matrix->n;i++) {
+    matrix->values[i] = malloc(matrix->m*sizeof(float));
+    for (int j=0;j<matrix->m;j++) {
+      matrix->values[i][j] = matrix->values[i][j] * scalar;
+    }
+  }
+}
+
 void freeMatrix(Matrix matrix) {
   for (int i; i<matrix->n; i++) {
     free(matrix->values[i]);
@@ -77,17 +102,6 @@ float maxValue(int m, float *array) {
   }
 
   return max;
-}
-
-float dotProduct(int n, float *vector1, float *vector2) {
-  float x = 0;
-
-  for (int i=0; i<n; i++) {
-    x = x + (vector1[i] * vector2[i]);
-  }
-
-
-  return x;
 }
 
 float matrixMax(Matrix matrix) {
@@ -160,6 +174,52 @@ void draw2DMatrix(Matrix matrix) {
   for (int i=0; i<3; i++) printf("\n");
 }
 
+/* dot product */
+float dotProduct(char orient, Matrix matrix1, int idx1, Matrix matrix2, int idx2) {
+  float x = 0.0;
+
+  switch (orient) {
+  case 'R':
+    for (int i=0; i<matrix1->n; i++) {
+      x = x + (matrix1->values[idx1][i] * matrix2->values[idx2][i]);
+    }
+  case 'C':
+    for (int i=0; i<matrix1->n; i++) {
+      x = x + (matrix1->values[i][idx1] * matrix2->values[i][idx2]);
+    }
+  }
+
+  return x;
+}
+
+float dotProductV(Matrix matrix1, Matrix matrix2) {
+  float x = dotProduct('C', matrix1, 0, matrix2, 0);
+  return x;
+}
+
+/* norm */
+float norm(char orient, int idx, Matrix matrix) {
+  float x = sqrt(dotProduct(orient, matrix, idx, matrix, idx));
+  return x;
+}
+
+float normV(Matrix matrix) {
+  float x = norm('C', 0, matrix);
+  return x;
+}
+
+/* projection */
+Matrix project(Matrix source, int idx1, Matrix target, int idx2) {
+  float x;
+  Matrix matrix = copyMatrix(target);
+  x = (dotProduct('C', source, idx1, target, idx2) /
+       dotProduct('C', target, idx1, target, idx2));
+  scaleMatrix(matrix, x);
+  return matrix;
+}
+
+
+/* matrix multiplication */
 Matrix multiplyMatrices(Matrix matrix1, Matrix matrix2) {
   Matrix matrix3;
 
