@@ -1,37 +1,71 @@
 /*
-  @file
+  @file qr.c
   @author Gerardo Veltri
   QR Decomposition
 */
 #include <stdio.h>
 #include <matrix.h>
 #include <stdlib.h>
+#include <math.h>
 
-int main() {
-  Matrix matrix1, matrix2, matrix3;
+/* Gram Schmidt Process on a Square Matrix */
+Matrix *gramSchmidt(Matrix A, Matrix *QR)
+{
+  Matrix Q = copyMatrix(A);
 
-  matrix1 = makeMatrix(4, 1, 'I', 1);
-  matrix2 = makeMatrix(4, 1, 'V', 1);
+  /* get orthonormal basis */
+  float _norm;
+  for (int i=0; i<A->m; i++)
+  {
+    printf("ITERATION %d", i);
+    draw2DMatrix(Q);
+    for (int j=0; j<i; j++)      
+    {
+      Matrix cur_proj;
+      cur_proj = project(A, i, Q, j);
+      subtractColumn(Q, i, cur_proj, 0);
+      printf("ITERATION %d, %d", i, j);
+      draw2DMatrix(cur_proj);
+      freeMatrix(cur_proj);
+    }
+    _norm = norm('C', Q, i);
+    printf("ITERATION END %d\n", i);
+    printf("%.10f\n", _norm);
+    draw2DMatrix(Q);
+    if (_norm != 0) /* if norm is zero, zero vector? */
+      scaleColumn(Q, i, 1/_norm);
+  }
+
+  Matrix Q_t = transposeMatrix(Q);
+  Matrix R = multiplyMatrices(Q_t, A);
+  
+  freeMatrix(Q_t);
+  QR[0] = Q;
+  QR[1] = R;
+  return QR;
+}
+
+int main()
+{
+  Matrix matrix1;
+
+  matrix1 = makeMatrix(4, 4, 'V', 1);
 
   draw2DMatrix(matrix1);
-  draw2DMatrix(matrix2);
 
-  float x = dotProductV(matrix1, matrix2);
+  Matrix *QR = malloc(sizeof(Matrix) * 2);
 
-  printf("%.6f", x);
-
-  printf("\n");
-
-  float y = normV(matrix1);
-
-  printf("%.6f", y);
-
-  matrix3 = project(matrix1, 0, matrix2, 0);
-
-  draw2DMatrix(matrix3);
+  gramSchmidt(matrix1, QR);
+  
+  printf("Q:\n");
+  draw2DMatrix(QR[0]);
+  printf("R:\n");
+  draw2DMatrix(QR[1]);
 
   freeMatrix(matrix1);
-  freeMatrix(matrix2);
+  freeMatrix(QR[0]);
+  freeMatrix(QR[1]);
+  free(QR);
 
   return 0;
 }
