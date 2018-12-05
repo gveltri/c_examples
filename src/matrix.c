@@ -10,8 +10,8 @@
 
 /* constants for rendering tables */
 const int PADDING = 1;
-const int PRECISION = 2;
-const char *FORMATTING  = "%.2f";
+const int PRECISION = 10;
+const char *FORMATTING  = "%.10f";
 
 
 void allocValues(float value, char type, Matrix matrix)
@@ -45,7 +45,7 @@ void allocValues(float value, char type, Matrix matrix)
           matrix->values[i][j] = 0;
         break;
       case 'R':
-	matrix->values[i][j] = (float)rand()/(float)(RAND_MAX/5);
+	matrix->values[i][j] = (float)rand()/(float)(RAND_MAX/1);
       }
     }
   }
