@@ -9,7 +9,7 @@
 #include <math.h>
 
 /* Gram Schmidt Process on a Square Matrix */
-Matrix *gramSchmidt(Matrix A, Matrix *QR)
+Matrix *gramSchmidt(Matrix A, Matrix *QR, int debug)
 {
   Matrix Q = copyMatrix(A);
 
@@ -17,20 +17,36 @@ Matrix *gramSchmidt(Matrix A, Matrix *QR)
   float _norm;
   for (int i=0; i<A->m; i++)
   {
-    printf("ITERATION %d", i);
-    draw2DMatrix(Q);
+    
+    if (debug)
+    {
+      printf("ITERATION %d", i);
+      draw2DMatrix(Q);
+    }
+    
     for (int j=0; j<i; j++)      
     {
+      
       Matrix cur_proj;
       cur_proj = project(A, i, Q, j);
       subtractColumn(Q, i, cur_proj, 0);
-      printf("ITERATION %d, %d", i, j);
-      draw2DMatrix(cur_proj);
+      
+      if (debug)
+      {
+	printf("ITERATION %d, %d", i, j);
+	draw2DMatrix(cur_proj);
+      }
       freeMatrix(cur_proj);
     }
+    
     _norm = norm('C', Q, i);
-    printf("ITERATION END %d\n", i);
-    draw2DMatrix(Q);
+
+    if (debug)
+    {
+      printf("ITERATION END %d\n", i);
+      draw2DMatrix(Q);
+    }
+    
     if (_norm != 0) /* if norm is zero, zero vector? */
       scaleColumn(Q, i, 1/_norm);
   }
@@ -48,13 +64,13 @@ int main()
 {
   Matrix matrix1, matrix2;
 
-  matrix1 = makeMatrix(4, 4, 'V', 1);
+  matrix1 = makeMatrix(4, 4, 'R', 1);
 
   draw2DMatrix(matrix1);
 
   Matrix *QR = malloc(sizeof(Matrix) * 2);
 
-  gramSchmidt(matrix1, QR);
+  gramSchmidt(matrix1, QR, 0);
   
   printf("Q:\n");
   draw2DMatrix(QR[0]);

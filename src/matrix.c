@@ -44,6 +44,8 @@ void allocValues(float value, char type, Matrix matrix)
         else
           matrix->values[i][j] = 0;
         break;
+      case 'R':
+	matrix->values[i][j] = (float)rand()/(float)(RAND_MAX/5);
       }
     }
   }
@@ -179,7 +181,6 @@ int numDigits(int n)
   int add = 0;
   if (n < 0)
     n = n * -1;
-    add = 1;
 
   if (n < 1)
     n = 1;
@@ -194,6 +195,7 @@ int numDigitsFloat(float x)
   int n = floor(x);
 
   n = numDigits(n);
+  if (x < 0) n++;
 
   return n;
 }
