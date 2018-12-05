@@ -316,7 +316,9 @@ Matrix project(Matrix source, int idx1, Matrix target, int idx2)
   Matrix projection = copyColumn(target, idx2);
 
   float st_dot = dotProduct('C', source, idx1, target, idx2);
-  float norm_squared = dotProduct('C', target, idx2, target, idx2);  
+  float norm_squared = dotProduct('C', target, idx2, target, idx2);
+  if (norm_squared == 0)
+    return projection;
   st_dot = st_dot / norm_squared;
 
   scaleMatrix(projection, st_dot);

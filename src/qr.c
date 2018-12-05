@@ -30,7 +30,6 @@ Matrix *gramSchmidt(Matrix A, Matrix *QR)
     }
     _norm = norm('C', Q, i);
     printf("ITERATION END %d\n", i);
-    printf("%.10f\n", _norm);
     draw2DMatrix(Q);
     if (_norm != 0) /* if norm is zero, zero vector? */
       scaleColumn(Q, i, 1/_norm);
@@ -47,7 +46,7 @@ Matrix *gramSchmidt(Matrix A, Matrix *QR)
 
 int main()
 {
-  Matrix matrix1;
+  Matrix matrix1, matrix2;
 
   matrix1 = makeMatrix(4, 4, 'V', 1);
 
@@ -62,9 +61,14 @@ int main()
   printf("R:\n");
   draw2DMatrix(QR[1]);
 
+  matrix2 = multiplyMatrices(QR[0], QR[1]);
+  printf("QR:\n");
+  draw2DMatrix(matrix2);
+
   freeMatrix(matrix1);
   freeMatrix(QR[0]);
   freeMatrix(QR[1]);
+  freeMatrix(matrix2);
   free(QR);
 
   return 0;
