@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <mem.h>
 #include <matrix.h>
 
 /* constants for rendering tables */
@@ -13,12 +14,10 @@ const int PADDING = 1;
 const int PRECISION = 10;
 const char *FORMATTING  = "%.10f";
 
-
-void allocValues(float value, char type, Matrix matrix)
+void setMatrixValues(float value, char type, Matrix matrix)
 {
   for (int i=0;i<matrix->n;i++)
-    {
-    matrix->values[i] = malloc(matrix->m*sizeof(float));
+  {
     for (int j=0;j<matrix->m;j++)
     {
       /* base matrix types */
@@ -45,108 +44,49 @@ void allocValues(float value, char type, Matrix matrix)
           matrix->values[i][j] = 0;
         break;
       case 'R':
-	matrix->values[i][j] = (float)rand()/(float)(RAND_MAX/1);
+        matrix->values[i][j] = (float)rand()/(float)(RAND_MAX/value);
+        break;
       }
     }
   }
 }
 
-Matrix makeMatrix(int n, int m, char type, float scalar)
+void copyMatrix(Matrix source, Matrix target)
 {
-  Matrix matrix = malloc(sizeof(struct _Matrix_));
-
-  matrix->n = n;
-  matrix->m = m;
-  matrix->values = malloc(n*sizeof(float*));
-  allocValues(scalar, type, matrix);
-
-  return matrix;
-}
-
-Matrix copyMatrix(Matrix matrix)
-{
-  Matrix new = malloc(sizeof(struct _Matrix_));
-
-  new->n = matrix->n;
-  new->m = matrix->m;
-  new->values = malloc(new->n*sizeof(float*));
-  for (int i=0;i<new->n;i++)
+  for (int i=0;i<source->n;i++)
   {
-    new->values[i] = malloc(new->m*sizeof(float));
-    for (int j=0;j<new->m;j++)
+    for (int j=0;j<source->m;j++)
     {
-      new->values[i][j] = matrix->values[i][j];
+      target->values[i][j] = source->values[i][j];
     }
   }
-
-  return new;
 }
 
-Matrix copyColumn(Matrix matrix, int idx)
+void copyColumn(Matrix source, int idx_s, Matrix target, int idx_t)
 {
-  Matrix new = malloc(sizeof(struct _Matrix_));
-
-  new->n = matrix->n;
-  new->m = 1;
-  new->values = malloc(new->n*sizeof(float*));
-  for (int i=0;i<new->n;i++)
+  for (int i=0;i<source->n;i++)
   {
-    new->values[i] = malloc(new->m*sizeof(float));
-    for (int j=0;j<new->m;j++)
+    target->values[i][idx_t] = source->values[i][idx_s];
+  }
+}
+
+void copyRow(Matrix source, int idx_s, Matrix target, int idx_t)
+{
+  for (int j=0;j<source->m;j++)
+  {
+    target->values[idx_t][j] = source->values[idx_s][j];
+  }
+}
+
+void transposeMatrix(Matrix source, Matrix target)
+{
+  for (int i=0;i<target->n;i++)
+  {
+    for (int j=0;j<target->m;j++)
     {
-      new->values[i][j] = matrix->values[i][idx];
+      target->values[i][j] = source->values[j][i];
     }
   }
-
-  return new;
-}
-
-Matrix copyRow(Matrix matrix, int idx)
-{
-  Matrix new = malloc(sizeof(struct _Matrix_));
-
-  new->n = 1;
-  new->m = matrix->m;
-  new->values = malloc(new->n*sizeof(float*));
-  for (int i=0;i<new->n;i++)
-  {
-    new->values[i] = malloc(new->m*sizeof(float));
-    for (int j=0;j<new->m;j++)
-    {
-      new->values[i][j] = matrix->values[idx][j];
-    }
-  }
-
-  return new;
-}
-
-Matrix transposeMatrix(Matrix source)
-{
-  Matrix matrix = malloc(sizeof(struct _Matrix_));
-
-  matrix->n = source->m;
-  matrix->m = source->n;
-  matrix->values = malloc(matrix->n*sizeof(float*));
-  for (int i=0;i<matrix->n;i++)
-  {
-    matrix->values[i] = malloc(matrix->m*sizeof(float));
-    for (int j=0;j<matrix->m;j++)
-    {
-      matrix->values[i][j] = source->values[j][i];
-    } 
-  }
-  return matrix;
-}
-
-void freeMatrix(Matrix matrix)
-{
-  for (int i; i<matrix->n; i++)
-  {
-    free(matrix->values[i]);
-  }
-
-  free(matrix->values);
-  free(matrix);
 }
 
 float maxValue(int m, float *array)
@@ -313,39 +253,33 @@ float normV(Matrix matrix) {
 }
 
 /* projection */
-Matrix project(Matrix source, int idx1, Matrix target, int idx2)
+void project(Matrix source1, int idx1, Matrix source2, int idx2,
+             Matrix target, int idx_t)
 {
-  Matrix projection = copyColumn(target, idx2);
+  copyColumn(source1, idx1, target, idx_t);
+  float st_dot = dotProduct('C', source1, idx1, source2, idx2);
+  float norm_squared = dotProduct('C', source2, idx2, source2, idx2);
 
-  float st_dot = dotProduct('C', source, idx1, target, idx2);
-  float norm_squared = dotProduct('C', target, idx2, target, idx2);
   if (norm_squared == 0)
-    return projection;
-  st_dot = st_dot / norm_squared;
+    return;
 
-  scaleMatrix(projection, st_dot);
-  
-  return projection;
+  st_dot = st_dot / norm_squared;
+  scaleColumn(target, idx_t, st_dot);
 }
 
 /* matrix multiplication */
-Matrix multiplyMatrices(Matrix matrix1, Matrix matrix2)
+void multiplyMatrices(Matrix source1, Matrix source2, Matrix target)
 {
-  Matrix matrix3;
-
-  matrix3 = makeMatrix(matrix1->n, matrix2->m, 'V', 0);
-
-  for (int i=0; i<matrix1->n; i++)
+  for (int i=0; i<source1->n; i++)
   {
-    for (int j=0; j<matrix2->m; j++)
+    for (int j=0; j<source2->m; j++)
     {
       float value = 0;
-      for (int k=0; k<matrix1->m; k++)
+      for (int k=0; k<source1->m; k++)
       {
-        value = value + (matrix1->values[i][k] * matrix2->values[k][j]);
+        value = value + (source1->values[i][k] * source2->values[k][j]);
       }
-      matrix3->values[i][j] = value;
+      target->values[i][j] = value;
     }
   }
-  return matrix3;
 }

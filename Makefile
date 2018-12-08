@@ -1,18 +1,20 @@
-IDIR=include
 CC=gcc
-CFLAGS=-I$(IDIR)
 
+IDIR=include
 SDIR=src
 ODIR=$(SDIR)/obj
 LDIR=lib
 BDIR=bin
 
+CFLAGS=-I$(IDIR)
+
+
 LIBS=""
 
-_DEPS = matrix.h
+_DEPS = mem.h matrix.h
 DEPS = $(patsubst %,$(IDIR)/%,$(_DEPS))
 
-_OBJ = qr.o matrix.o
+_OBJ = matrix.o mem.o qr.o
 OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 
 
@@ -28,4 +30,4 @@ run:
 .PHONY: clean
 
 clean:
-	rm -f $(ODIR)/*.o *~ core $(INCDIR)/*~ 
+	rm -f $(ODIR)/*.o *~ core $(INCDIR)/*~
