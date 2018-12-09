@@ -17,8 +17,6 @@ void gramSchmidt(Matrix A, Matrix QR[2], int debug)
   Matrix R = QR[1];
   copyMatrix(A,Q);
 
-  draw2DMatrix(A);
-
   /* get orthonormal basis */
   float _norm;
   for (int i=0; i<A->m; i++)
@@ -33,7 +31,7 @@ void gramSchmidt(Matrix A, Matrix QR[2], int debug)
     for (int j=0; j<i; j++)
     {
 
-      project(A, i, Q, j, cur_proj, 0);
+      project(Q, i, Q, j, cur_proj, 0);
       subtractColumn(Q, i, cur_proj, 0);
 
       if (debug)
@@ -69,7 +67,7 @@ int main()
 {
   MatrixStack stack = allocMatrixStack(4,4,4);
   Matrix A = popMatrixStack(stack);
-  setMatrixValues(1, 'V', A);
+  setMatrixValues(1, 'R', A);
 
   printf("A=\n");
   draw2DMatrix(A);
@@ -78,7 +76,7 @@ int main()
                   popMatrixStack(stack)};
   Matrix _A = popMatrixStack(stack);
 
-  gramSchmidt(A, QR, 1);
+  gramSchmidt(A, QR, 0);
 
   printf("Q=\n");
   draw2DMatrix(QR[0]);
@@ -88,6 +86,13 @@ int main()
   multiplyMatrices(QR[0], QR[1], _A);
   printf("QR=\n");
   draw2DMatrix(_A);
+
+  subtractMatrix(A, _A);
+  absMatrix(A);
+  float mean = meanMatrix(A);
+  printf("Q - QR=\n");
+  draw2DMatrix(A);
+  printf("%.20f\n", mean);
 
   freeMatrixStack(stack);
 

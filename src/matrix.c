@@ -64,7 +64,7 @@ void copyMatrix(Matrix source, Matrix target)
 
 void copyColumn(Matrix source, int idx_s, Matrix target, int idx_t)
 {
-  for (int i=0;i<source->n;i++)
+  for (int i=0;i<target->n;i++)
   {
     target->values[i][idx_t] = source->values[i][idx_s];
   }
@@ -115,6 +115,26 @@ float matrixMax(Matrix matrix)
 
   return max;
 }
+
+float sumMatrix(Matrix matrix)
+{
+  float sum = 0;
+  for (int i=0;i<matrix->n;i++)
+    {
+      for (int j=0;j<matrix->m;j++)
+        {
+          sum = matrix->values[i][j];
+        }
+    }
+  return sum;
+}
+
+float meanMatrix(Matrix matrix)
+{
+  float sum = sumMatrix(matrix);
+  return sum / (matrix->n * matrix->m);
+}
+
 
 int numDigits(int n)
 {
@@ -184,22 +204,30 @@ void draw2DMatrix(Matrix matrix)
 }
 
 /* scaling operations */
-void scaleMatrix(Matrix matrix, float scalar)
-{
-  for (int i=0;i<matrix->n;i++)
-  {
-    for (int j=0;j<matrix->m;j++)
-    {
-      matrix->values[i][j] = (matrix->values[i][j]) * scalar;
-    }
-  }
-}
-
 void scaleColumn(Matrix matrix, int idx, float scalar)
 {
   for (int i=0;i<matrix->n;i++)
   {
     matrix->values[i][idx] = (matrix->values[i][idx]) * scalar;
+  }
+}
+
+void scaleMatrix(Matrix matrix, float scalar)
+{
+  for (int i=0;i<matrix->m;i++)
+  {
+    scaleColumn(matrix, i, scalar);
+  }
+}
+
+void absMatrix(Matrix matrix)
+{
+  for (int i=0; i<matrix->n; i++)
+  {
+    for (int j=0; j<matrix->m; j++)
+    {
+      matrix->values[i][j] = fabsf(matrix->values[i][j]);
+    }
   }
 }
 
@@ -209,6 +237,13 @@ void subtractColumn(Matrix matrix1, int idx1, Matrix matrix2, int idx2)
   for (int i=0; i<matrix1->n; i++)
   {
     matrix1->values[i][idx1] = matrix1->values[i][idx1] - matrix2->values[i][idx2];
+  }
+}
+
+void subtractMatrix(Matrix matrix1, Matrix matrix2) {
+  for (int i=0; i<matrix1->m; i++)
+  {
+    subtractColumn(matrix1, i, matrix2, i);
   }
 }
 
@@ -256,7 +291,7 @@ float normV(Matrix matrix) {
 void project(Matrix source1, int idx1, Matrix source2, int idx2,
              Matrix target, int idx_t)
 {
-  copyColumn(source1, idx1, target, idx_t);
+  copyColumn(source2, idx2, target, idx_t);
   float st_dot = dotProduct('C', source1, idx1, source2, idx2);
   float norm_squared = dotProduct('C', source2, idx2, source2, idx2);
 
