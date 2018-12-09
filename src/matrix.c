@@ -5,6 +5,7 @@
 */
 #include <stdio.h>
 #include <stdlib.h>
+#include <assert.h>
 #include <math.h>
 #include <mem.h>
 #include <matrix.h>
@@ -231,19 +232,36 @@ void absMatrix(Matrix matrix)
   }
 }
 
-/* subtraction */
-void subtractColumn(Matrix matrix1, int idx1, Matrix matrix2, int idx2)
+/* addition and subtraction */
+void addColumn(Matrix target, int idx1, Matrix source, int idx2)
 {
-  for (int i=0; i<matrix1->n; i++)
+  for (int i=0; i<target->n; i++)
+    {
+      target->values[i][idx1] = target->values[i][idx1] + source->values[i][idx2];
+    }
+}
+
+void addMatrix(Matrix target, Matrix source)
+{
+  for (int i=0; i<target->m; i++)
+    {
+      addColumn(target, i, source, i);
+    }
+}
+
+
+void subtractColumn(Matrix target, int idx1, Matrix source, int idx2)
+{
+  for (int i=0; i<target->n; i++)
   {
-    matrix1->values[i][idx1] = matrix1->values[i][idx1] - matrix2->values[i][idx2];
+    target->values[i][idx1] = target->values[i][idx1] - source->values[i][idx2];
   }
 }
 
-void subtractMatrix(Matrix matrix1, Matrix matrix2) {
-  for (int i=0; i<matrix1->m; i++)
+void subtractMatrix(Matrix target, Matrix source) {
+  for (int i=0; i<target->m; i++)
   {
-    subtractColumn(matrix1, i, matrix2, i);
+    subtractColumn(target, i, source, i);
   }
 }
 
@@ -255,15 +273,19 @@ float dotProduct(char orient, Matrix matrix1, int idx1, Matrix matrix2, int idx2
   switch (orient)
   {
   case 'R':
-    for (int i=0; i<matrix1->n; i++)
+    assert(matrix1->m == matrix2->m);
+    for (int i=0; i<matrix1->m; i++)
     {
       x = x + (matrix1->values[idx1][i] * matrix2->values[idx2][i]);
     }
+    break;
   case 'C':
+    assert(matrix1->n == matrix2->n);
     for (int i=0; i<matrix1->n; i++)
     {
       x = x + (matrix1->values[i][idx1] * matrix2->values[i][idx2]);
     }
+    break;
   }
 
   return x;
@@ -275,7 +297,7 @@ float dotProductV(Matrix matrix1, Matrix matrix2)
   return x;
 }
 
-/* norm */
+/* norm and normalization */
 float norm(char orient, Matrix matrix, int idx)
 {
   float x = sqrt(dotProduct(orient, matrix, idx, matrix, idx));
@@ -285,6 +307,12 @@ float norm(char orient, Matrix matrix, int idx)
 float normV(Matrix matrix) {
   float x = norm('C', matrix, 0);
   return x;
+}
+
+void normalizeColumn(Matrix matrix, int idx) {
+  float _norm = norm('C', matrix, idx);
+  if (_norm != 0) /* if norm is zero, zero vector */
+    scaleColumn(matrix, idx, 1/_norm);
 }
 
 /* projection */
@@ -302,9 +330,28 @@ void project(Matrix source1, int idx1, Matrix source2, int idx2,
   scaleColumn(target, idx_t, st_dot);
 }
 
+/*  outer product of self */
+void outerMatrix(Matrix source, int idx_s, Matrix target)
+{
+  assert(source->n == target->n);
+  assert(target->n == target->m);
+
+  for (int i=0; i<target->n; i++)
+  {
+    for (int j=0; j<target->m; j++)
+    {
+      target->values[i][j] = source->values[i][idx_s] * source->values[j][idx_s];
+    }
+  }
+}
+
+
 /* matrix multiplication */
 void multiplyMatrices(Matrix source1, Matrix source2, Matrix target)
 {
+  assert(source1->m == source2->n);
+  assert(source1->n == target->n);
+  assert(source2->m == target->m);
   for (int i=0; i<source1->n; i++)
   {
     for (int j=0; j<source2->m; j++)
@@ -318,3 +365,4 @@ void multiplyMatrices(Matrix source1, Matrix source2, Matrix target)
     }
   }
 }
+

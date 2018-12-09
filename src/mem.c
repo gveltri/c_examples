@@ -52,11 +52,8 @@ MatrixStack allocMatrixStack(int n, int m, int depth)
   {
     stack->matrices[i] = allocMatrix(n,m);
   }
-  printf("(stack->matrices[0])->values:%lu\n", sizeof((stack->matrices[0])->values));
 
   stack->top = (stack->matrices)+(stack->depth)-1;
-
-  printf("(*(stack->top))->values): %lu\n", sizeof((*(stack->top))->values));
 
   return stack;
 }
