@@ -58,7 +58,6 @@ void gramSchmidt(Matrix A, Matrix QR[2], int debug)
   freeMatrix(cur_proj);
   Matrix Q_t = allocMatrix(A->m, A->n);
   transposeMatrix(Q, Q_t);
-  draw2DMatrix(Q_t);
   multiplyMatrices(Q_t, A, R);
   freeMatrix(Q_t);
 }
