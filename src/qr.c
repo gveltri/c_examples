@@ -105,7 +105,13 @@ void hhReflectionsQR(Matrix A, Matrix QR[2], int debug) {
   Matrix I = popMatrixStack(stack); /* make I type of Matrix with low mem usage */
   setMatrixValues(1, 'I', I);
 
-  for (int i=0; i<A->m; i++)
+  copyMatrix(A,QR[1]);
+
+  /*
+    iterate through all but last column
+    for symmetric matrix
+   */
+  for (int i=0; i<A->m-1; i++)
   {
 
     /* get householder vector */
@@ -114,7 +120,7 @@ void hhReflectionsQR(Matrix A, Matrix QR[2], int debug) {
       if (j < i)
         x->values[j][0] = 0;
       else
-        x->values[j][0] = A->values[j][0];
+        x->values[j][0] = QR[1]->values[j][i];
     }
     setMatrixValues(0, 'V', v);
     v->values[i][0] = norm('C', x, 0);
@@ -152,9 +158,10 @@ void hhReflectionsQR(Matrix A, Matrix QR[2], int debug) {
     pushMatrixStack(stack, Qn);
     Q = Qt;
 
+    multiplyMatrices(Q, A, QR[1]);
+
     if (debug)
     {
-      multiplyMatrices(Q, A, QR[1]);
       printf("Q%d(Q..)=\n", i);
       draw2DMatrix(Q);
       printf("Q%d(Q..) * A=\n", i);
@@ -165,7 +172,6 @@ void hhReflectionsQR(Matrix A, Matrix QR[2], int debug) {
   }
 
   transposeMatrix(Q, QR[0]);
-  multiplyMatrices(Q, A, QR[1]);
 
   pushMatrixStack(stack, Q);
   pushMatrixStack(stack, I);
@@ -177,7 +183,7 @@ void hhReflectionsQR(Matrix A, Matrix QR[2], int debug) {
 
 int main()
 {
-  MatrixStack stack = allocMatrixStack(3,3,4);
+  MatrixStack stack = allocMatrixStack(4,4,4);
   Matrix A = popMatrixStack(stack);
   setMatrixValues(10, 'R', A);
 
