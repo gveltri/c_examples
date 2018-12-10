@@ -183,7 +183,7 @@ void hhReflectionsQR(Matrix A, Matrix QR[2], int debug) {
 
 int main()
 {
-  MatrixStack stack = allocMatrixStack(4,4,4);
+  MatrixStack stack = allocMatrixStack(5,5,4);
   Matrix A = popMatrixStack(stack);
   setMatrixValues(10, 'R', A);
 
@@ -214,6 +214,10 @@ int main()
   printf("Mean Error=\n");
   printf("%.20f\n", mean);
 
+  pushMatrixStack(stack, QR[0]);
+  pushMatrixStack(stack, QR[1]);
+  pushMatrixStack(stack, A);
+  pushMatrixStack(stack, _A);
   freeMatrixStack(stack);
 
   return 0;
