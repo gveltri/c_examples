@@ -69,17 +69,24 @@ Matrix popMatrixStack(MatrixStack stack)
 
 void pushMatrixStack(MatrixStack stack, Matrix matrix)
 {
-  stack->top--;
+  stack->top++;
   *(stack->top) = matrix;
   stack->cur_depth++;
 }
 
 void freeMatrixStack(MatrixStack stack)
 {
-  for (int i=0; i<stack->depth; i++)
+  if (stack->cur_depth == 0)
   {
-    freeMatrix(stack->matrices[i]);
+    free(stack);
+    return;
   }
+
+  do
+  {
+    freeMatrix(*(stack->top--));
+    stack->cur_depth--;
+  } while (stack->cur_depth > 0);
 
   free(stack);
 }
