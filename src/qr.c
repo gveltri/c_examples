@@ -144,7 +144,9 @@ void hhReflectionsQR(Matrix A, Matrix QR[2], int debug) {
 
     Qn = popMatrixStack(stack);
     outerMatrix(v, 0, Qn);
-    scaleMatrix(Qn, -2 / dotProductV(v,v));
+    float dot_product_hh = dotProductV(v,v);
+    if (dot_product_hh != 0)
+      scaleMatrix(Qn, -2 / dot_product_hh);
     addMatrix(Qn, I);
     if (debug)
     {
@@ -185,7 +187,7 @@ int main()
 {
   MatrixStack stack = allocMatrixStack(5,5,4);
   Matrix A = popMatrixStack(stack);
-  setMatrixValues(10, 'R', A);
+  setMatrixValues(2, 'V', A);
 
   printf("A=\n");
   draw2DMatrix(A);
