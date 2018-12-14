@@ -11,7 +11,7 @@ typedef struct _Matrix_ {
   int n; /* columns */
   int m; /* rows */
 
-  float **values;
+  double **values;
 
 } *Matrix;
 

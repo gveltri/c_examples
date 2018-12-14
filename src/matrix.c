@@ -12,10 +12,10 @@
 
 /* constants for rendering tables */
 const int PADDING = 1;
-const int PRECISION = 10;
-const char *FORMATTING  = "%.10f";
+const int PRECISION = 6;
+const char *FORMATTING  = "%.6f";
 
-void setMatrixValues(float value, char type, Matrix matrix)
+void setMatrixValues(double value, char type, Matrix matrix)
 {
   for (int i=0;i<matrix->n;i++)
   {
@@ -45,7 +45,7 @@ void setMatrixValues(float value, char type, Matrix matrix)
           matrix->values[i][j] = 0;
         break;
       case 'R':
-        matrix->values[i][j] = (float)rand()/(float)(RAND_MAX/value);
+        matrix->values[i][j] = (double)rand()/(double)(RAND_MAX/value);
         break;
       }
     }
@@ -90,7 +90,7 @@ void transposeMatrix(Matrix source, Matrix target)
   }
 }
 
-float maxValue(int m, float *array)
+double maxValue(int m, double *array)
 {
   int max = array[0];
 
@@ -103,13 +103,13 @@ float maxValue(int m, float *array)
   return max;
 }
 
-float matrixMax(Matrix matrix)
+double matrixMax(Matrix matrix)
 {
-  float max = maxValue(matrix->m, matrix->values[0]);
+  double max = maxValue(matrix->m, matrix->values[0]);
 
   for (int i=1; i < matrix->n; i++)
   {
-    float curr = maxValue(matrix->m, matrix->values[i]);
+    double curr = maxValue(matrix->m, matrix->values[i]);
     if (max < curr)
       max = curr;
   }
@@ -117,9 +117,9 @@ float matrixMax(Matrix matrix)
   return max;
 }
 
-float sumMatrix(Matrix matrix)
+double sumMatrix(Matrix matrix)
 {
-  float sum = 0;
+  double sum = 0;
   for (int i=0;i<matrix->n;i++)
     {
       for (int j=0;j<matrix->m;j++)
@@ -130,9 +130,9 @@ float sumMatrix(Matrix matrix)
   return sum;
 }
 
-float meanMatrix(Matrix matrix)
+double meanMatrix(Matrix matrix)
 {
-  float sum = sumMatrix(matrix);
+  double sum = sumMatrix(matrix);
   return sum / (matrix->n * matrix->m);
 }
 
@@ -151,7 +151,7 @@ int numDigits(int n)
   return n;
 }
 
-int numDigitsFloat(float x)
+int numDigitsDouble(double x)
 {
   int n = floor(x);
 
@@ -161,10 +161,10 @@ int numDigitsFloat(float x)
   return n;
 }
 
-void draw2DMatrix(Matrix matrix)
+void drawMatrix(Matrix matrix)
 {
-  float matrix_max = matrixMax(matrix);
-  int max_width = numDigitsFloat(matrix_max);
+  double matrix_max = matrixMax(matrix);
+  int max_width = numDigitsDouble(matrix_max);
   max_width = max_width + PADDING + PRECISION - 1;
 
    /* header */
@@ -186,9 +186,9 @@ void draw2DMatrix(Matrix matrix)
     }
     for (int j=0; j<matrix->m; j++)
     {
-      float value = matrix->values[i][j];
+      double value = matrix->values[i][j];
       printf(FORMATTING, value);
-      int blank_fill = max_width - numDigitsFloat(value);
+      int blank_fill = max_width - numDigitsDouble(value);
       for (int i=0; i<blank_fill; i++)
       {
         printf(" ");
@@ -205,7 +205,7 @@ void draw2DMatrix(Matrix matrix)
 }
 
 /* scaling operations */
-void scaleColumn(Matrix matrix, int idx, float scalar)
+void scaleColumn(Matrix matrix, int idx, double scalar)
 {
   for (int i=0;i<matrix->n;i++)
   {
@@ -213,7 +213,7 @@ void scaleColumn(Matrix matrix, int idx, float scalar)
   }
 }
 
-void scaleMatrix(Matrix matrix, float scalar)
+void scaleMatrix(Matrix matrix, double scalar)
 {
   for (int i=0;i<matrix->m;i++)
   {
@@ -227,7 +227,7 @@ void absMatrix(Matrix matrix)
   {
     for (int j=0; j<matrix->m; j++)
     {
-      matrix->values[i][j] = fabsf(matrix->values[i][j]);
+      matrix->values[i][j] = fabs(matrix->values[i][j]);
     }
   }
 }
@@ -266,9 +266,9 @@ void subtractMatrix(Matrix target, Matrix source) {
 }
 
 /* dot product */
-float dotProduct(char orient, Matrix matrix1, int idx1, Matrix matrix2, int idx2)
+double dotProduct(char orient, Matrix matrix1, int idx1, Matrix matrix2, int idx2)
 {
-  float x = 0.0;
+  double x = 0.0;
 
   switch (orient)
   {
@@ -291,26 +291,26 @@ float dotProduct(char orient, Matrix matrix1, int idx1, Matrix matrix2, int idx2
   return x;
 }
 
-float dotProductV(Matrix matrix1, Matrix matrix2)
+double dotProductV(Matrix matrix1, Matrix matrix2)
 {
-  float x = dotProduct('C', matrix1, 0, matrix2, 0);
+  double x = dotProduct('C', matrix1, 0, matrix2, 0);
   return x;
 }
 
 /* norm and normalization */
-float norm(char orient, Matrix matrix, int idx)
+double norm(char orient, Matrix matrix, int idx)
 {
-  float x = sqrt(dotProduct(orient, matrix, idx, matrix, idx));
+  double x = sqrt(dotProduct(orient, matrix, idx, matrix, idx));
   return x;
 }
 
-float normV(Matrix matrix) {
-  float x = norm('C', matrix, 0);
+double normV(Matrix matrix) {
+  double x = norm('C', matrix, 0);
   return x;
 }
 
 void normalizeColumn(Matrix matrix, int idx) {
-  float _norm = norm('C', matrix, idx);
+  double _norm = norm('C', matrix, idx);
   if (_norm != 0) /* if norm is zero, zero vector */
     scaleColumn(matrix, idx, 1/_norm);
 }
@@ -320,8 +320,8 @@ void project(Matrix source1, int idx1, Matrix source2, int idx2,
              Matrix target, int idx_t)
 {
   copyColumn(source2, idx2, target, idx_t);
-  float st_dot = dotProduct('C', source1, idx1, source2, idx2);
-  float norm_squared = dotProduct('C', source2, idx2, source2, idx2);
+  double st_dot = dotProduct('C', source1, idx1, source2, idx2);
+  double norm_squared = dotProduct('C', source2, idx2, source2, idx2);
 
   if (norm_squared == 0)
     return;
@@ -356,7 +356,7 @@ void multiplyMatrices(Matrix source1, Matrix source2, Matrix target)
   {
     for (int j=0; j<source2->m; j++)
     {
-      float value = 0;
+      double value = 0;
       for (int k=0; k<source1->m; k++)
       {
         value = value + (source1->values[i][k] * source2->values[k][j]);

@@ -12,7 +12,7 @@ void allocValues(Matrix matrix)
 {
   for (int i=0;i<matrix->n;i++)
   {
-    matrix->values[i] = malloc(matrix->m*sizeof(float));
+    matrix->values[i] = malloc(matrix->m*sizeof(double));
   }
 }
 
@@ -22,7 +22,7 @@ Matrix allocMatrix(int n, int m)
 
   matrix->n = n;
   matrix->m = m;
-  matrix->values = malloc(n*sizeof(float*));
+  matrix->values = malloc(n*sizeof(double*));
   allocValues(matrix);
 
   return matrix;

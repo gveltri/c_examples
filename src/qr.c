@@ -12,7 +12,7 @@
 /*
   QR Gram Schmidt Process on a Square Matrix
 
-  Memory Complexity
+  Memory Allocation
   -----------------
 
   input three matrices A, Q, R
@@ -20,26 +20,31 @@
   one scratch matrix of size n,n to store transpose
 
 */
-void gramSchmidtQR(Matrix A, Matrix QR[2], int debug)
+void _gramSchmidtQR(Matrix A, Matrix QR[2], MatrixStack mem_stacks[2], int debug)
 {
   assert(A->m == A->n);
   assert(A->m == QR[0]->m);
   assert(A->m == QR[0]->n);
 
-  Matrix cur_proj = allocMatrix(A->n, 1);
+  MatrixStack stackMxNd1 = mem_stacks[0];
+  MatrixStack stackNx1d1 = mem_stacks[1];
+  
+  Matrix Q_t = popMatrixStack(stackMxNd1);
+  Matrix cur_proj = popMatrixStack(stackNx1d1);  
+
   Matrix Q = QR[0];
   Matrix R = QR[1];
-  copyMatrix(A,Q);
+  copyMatrix(A, Q);
 
   /* get orthonormal basis */
-  float _norm;
+  double _norm;
   for (int i=0; i<A->m; i++)
   {
 
     if (debug)
     {
       printf("ITERATION %d", i);
-      draw2DMatrix(Q);
+      drawMatrix(Q);
     }
 
     for (int j=0; j<i; j++)
@@ -51,7 +56,7 @@ void gramSchmidtQR(Matrix A, Matrix QR[2], int debug)
       if (debug)
       {
         printf("ITERATION %d, %d", i, j);
-        draw2DMatrix(cur_proj);
+        drawMatrix(cur_proj);
       }
     }
 
@@ -60,23 +65,36 @@ void gramSchmidtQR(Matrix A, Matrix QR[2], int debug)
     if (debug)
     {
       printf("ITERATION END %d\n", i);
-      draw2DMatrix(Q);
+      drawMatrix(Q);
     }
 
   }
 
-  freeMatrix(cur_proj);
-  Matrix Q_t = allocMatrix(A->m, A->n);
   transposeMatrix(Q, Q_t); /* combine into one step with transposeMultiply */
   multiplyMatrices(Q_t, A, R);
-  freeMatrix(Q_t);
+
+  pushMatrixStack(stackNx1d1, cur_proj);
+  pushMatrixStack(stackMxNd1, Q_t);
+}
+
+void gramSchmidtQR(Matrix A, Matrix QR[2], int debug)
+{
+  MatrixStack mem_stacks[] = {
+    allocMatrixStack(A->m, A->n, 1),
+    allocMatrixStack(A->n, 1, 1),
+  };
+
+  _gramSchmidtQR(A, QR, mem_stacks, debug);
+
+  freeMatrixStack(mem_stacks[0]);
+  freeMatrixStack(mem_stacks[1]);
 }
 
 
 /*
   QR with Householder Reflections on a Symmetric Matrix
 
-  Memory Complexity
+  Memory Allocation
   -----------------
 
   input three matrices A, Q, R
@@ -88,21 +106,24 @@ void gramSchmidtQR(Matrix A, Matrix QR[2], int debug)
   two matrices size (n,1) for v and x
 
  */
-void hhReflectionsQR(Matrix A, Matrix QR[2], int debug) {
+void _hhReflectionsQR(Matrix A, Matrix QR[2],
+		     MatrixStack mem_stacks[2],
+		     int debug) {
 
   assert(A->m == A->n);
   assert(A->m == QR[0]->m);
   assert(A->m == QR[0]->n);
 
   Matrix Qn, Qt;
-  MatrixStack stack = allocMatrixStack(A->n, A->n, 4);
-  Matrix v  = allocMatrix(A->n, 1);
-  Matrix x  = allocMatrix(A->n, 1);
+  MatrixStack stackNxNd4 = mem_stacks[0];
+  MatrixStack stackNx1d2 = mem_stacks[1];
+  Matrix v  = popMatrixStack(stackNx1d2);
+  Matrix x  = popMatrixStack(stackNx1d2);
 
-  Matrix Q = popMatrixStack(stack);
+  Matrix Q = popMatrixStack(stackNxNd4);
   setMatrixValues(1, 'I', Q);
 
-  Matrix I = popMatrixStack(stack); /* make I type of Matrix with low mem usage */
+  Matrix I = popMatrixStack(stackNxNd4); /* make I type of Matrix with low mem usage */
   setMatrixValues(1, 'I', I);
 
   copyMatrix(A,QR[1]);
@@ -127,37 +148,38 @@ void hhReflectionsQR(Matrix A, Matrix QR[2], int debug) {
 
     if (debug)
     {
-      printf("ITERATION %d\n", i);
-      printf("norm = %.10f\n", v->values[i][0]);
-      draw2DMatrix(v);
+      printf("norm=%.10f\n", v->values[i][0]);
+      printf("aii=%.10f\n", v->values[i][0]);
     }
-
-    addColumn(v, 0, x, 0);
+    
+    if (x->values[i][0] > 0)
+      v->values[i][0] = v->values[i][0] * -1;
+    
+    subtractColumn(x, 0, v, 0);
 
     if (debug)
     {
-      printf("x=\n");
-      draw2DMatrix(x);
+      printf("ITERATION %d\n", i);
       printf("householder vector=\n");
-      draw2DMatrix(v);
+      drawMatrix(x);
     }
 
-    Qn = popMatrixStack(stack);
-    outerMatrix(v, 0, Qn);
-    float dot_product_hh = dotProductV(v,v);
+    Qn = popMatrixStack(stackNxNd4);
+    outerMatrix(x, 0, Qn);
+    double dot_product_hh = dotProductV(x,x);
     if (dot_product_hh != 0)
       scaleMatrix(Qn, -2 / dot_product_hh);
     addMatrix(Qn, I);
     if (debug)
     {
       printf("I - ((2/vTv)vvT)=\n");
-      draw2DMatrix(Qn);
+      drawMatrix(Qn);
     }
 
-    Qt = popMatrixStack(stack);
+    Qt = popMatrixStack(stackNxNd4);
     multiplyMatrices(Qn, Q, Qt);
-    pushMatrixStack(stack, Q);
-    pushMatrixStack(stack, Qn);
+    pushMatrixStack(stackNxNd4, Q);
+    pushMatrixStack(stackNxNd4, Qn);
     Q = Qt;
 
     multiplyMatrices(Q, A, QR[1]);
@@ -165,9 +187,9 @@ void hhReflectionsQR(Matrix A, Matrix QR[2], int debug) {
     if (debug)
     {
       printf("Q%d(Q..)=\n", i);
-      draw2DMatrix(Q);
+      drawMatrix(Q);
       printf("Q%d(Q..) * A=\n", i);
-      draw2DMatrix(QR[1]);
+      drawMatrix(QR[1]);
       printf("ITERATION %d END\n", i);
     }
 
@@ -175,46 +197,64 @@ void hhReflectionsQR(Matrix A, Matrix QR[2], int debug) {
 
   transposeMatrix(Q, QR[0]);
 
-  pushMatrixStack(stack, Q);
-  pushMatrixStack(stack, I);
+  pushMatrixStack(stackNxNd4, Q);
+  pushMatrixStack(stackNxNd4, I);
 
-  freeMatrixStack(stack);
-  freeMatrix(v);
-  freeMatrix(x);
+  pushMatrixStack(stackNx1d2,v);
+  pushMatrixStack(stackNx1d2,x);
 }
+
+void hhReflectionsQR(Matrix A, Matrix QR[2],
+		     int debug)
+{
+  MatrixStack mem_stacks[] = {
+    allocMatrixStack(A->n, A->m, 4),
+    allocMatrixStack(A->n, 1, 2)
+  };
+  
+  _hhReflectionsQR(A, QR, mem_stacks, debug);
+
+  freeMatrixStack(mem_stacks[0]);
+  freeMatrixStack(mem_stacks[1]);
+}
+
+
+
+
 
 int main()
 {
   MatrixStack stack = allocMatrixStack(5,5,4);
+  
   Matrix A = popMatrixStack(stack);
-  setMatrixValues(2, 'V', A);
-
-  printf("A=\n");
-  draw2DMatrix(A);
-
   Matrix QR[2] = {popMatrixStack(stack),
                   popMatrixStack(stack)};
   Matrix _A = popMatrixStack(stack);
+  
+  setMatrixValues(10, 'R', A);
 
-  hhReflectionsQR(A, QR, 1);
-
+  printf("A=\n");
+  drawMatrix(A);
+  
+  hhReflectionsQR(A, QR, 0);
+  
   printf("Q=\n");
-  draw2DMatrix(QR[0]);
+  drawMatrix(QR[0]);
   printf("R=\n");
-  draw2DMatrix(QR[1]);
+  drawMatrix(QR[1]);
 
   multiplyMatrices(QR[0], QR[1], _A);
   printf("QR=\n");
-  draw2DMatrix(_A);
+  drawMatrix(_A);
 
   subtractMatrix(A, _A);
   absMatrix(A);
-  float mean = meanMatrix(A);
+  double mean = meanMatrix(A);
   printf("Q - QR=\n");
-  draw2DMatrix(A);
+  drawMatrix(A);
 
   printf("Mean Error=\n");
-  printf("%.20f\n", mean);
+  printf("%.6f\n", mean);
 
   pushMatrixStack(stack, QR[0]);
   pushMatrixStack(stack, QR[1]);
