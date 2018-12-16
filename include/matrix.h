@@ -8,6 +8,8 @@
 
 void setMatrixValues(double value, char type, Matrix matrix);
 void copyMatrix(Matrix source, Matrix target);
+void copyRow(Matrix source, int idx_s, Matrix target, int idx_t);
+void switchRow(Matrix matrix, int row1, int row2);
 void transposeMatrix(Matrix source, Matrix target);
 
 void scaleColumn(Matrix matrix, int idx, double scalar);
@@ -17,6 +19,7 @@ void absMatrix(Matrix matrix);
 void addColumn(Matrix target, int idx1, Matrix source, int idx2);
 void addMatrix(Matrix target, Matrix source);
 void subtractColumn(Matrix target, int idx1, Matrix Source, int idx2);
+void subtractRow(Matrix target, int idx1, Matrix source, int idx2);
 void subtractMatrix(Matrix target, Matrix source);
 
 void drawMatrix(Matrix matrix);

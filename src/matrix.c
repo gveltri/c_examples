@@ -73,9 +73,28 @@ void copyColumn(Matrix source, int idx_s, Matrix target, int idx_t)
 
 void copyRow(Matrix source, int idx_s, Matrix target, int idx_t)
 {
-  for (int j=0;j<source->m;j++)
+  for (int i=0;i<source->m;i++)
   {
-    target->values[idx_t][j] = source->values[idx_s][j];
+    target->values[idx_t][i] = source->values[idx_s][i];
+  }
+}
+
+void switchRow(Matrix matrix, int row1, int row2)
+{
+  double scratch[matrix->n];
+  for (int i=0; i<matrix->m; i++)
+  {
+    scratch[i] = matrix->values[row1][i];
+  }
+
+  for (int i=0; i<matrix->m; i++)
+  {
+    matrix->values[row1][i] = matrix->values[row2][i];
+  }
+
+  for (int i=0; i<matrix->m; i++)
+  {
+    matrix->values[row2][i] = scratch[i];
   }
 }
 
@@ -246,6 +265,14 @@ void addMatrix(Matrix target, Matrix source)
   for (int i=0; i<target->m; i++)
     {
       addColumn(target, i, source, i);
+    }
+}
+
+void subtractRow(Matrix target, int idx1, Matrix source, int idx2)
+{
+  for (int i=0; i<target->m; i++)
+    {
+      target->values[idx1][i] = target->values[idx1][i] - source->values[idx2][i];
     }
 }
 

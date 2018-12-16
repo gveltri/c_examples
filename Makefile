@@ -8,24 +8,24 @@ BDIR=bin
 
 CFLAGS=-I$(IDIR)
 
-
 LIBS=""
 
-_DEPS = mem.h matrix.h
+_DEPS = mem.h matrix.h factorization.h
 DEPS = $(patsubst %,$(IDIR)/%,$(_DEPS))
 
-_OBJ = matrix.o mem.o qr.o
+_OBJ = matrix.o mem.o factorization.o linalg.o
 OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 
 
 $(ODIR)/%.o: $(SDIR)/%.c $(DEPS)
 	$(CC) -c -o $@ $< $(CFLAGS)
 
-$(BDIR)/QR: $(OBJ)
+$(BDIR)/linalg: $(OBJ)
 	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
 
-run:
-	./$(BDIR)/QR
+test:
+	./$(BDIR)/linalg ge -v
+
 
 .PHONY: clean
 

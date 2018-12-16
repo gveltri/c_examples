@@ -1,11 +1,12 @@
 /*
-  @file qr.c
+  @file factorization.c
   @author Gerardo Veltri
-  QR Decomposition
+  Factorization and Related Algorithms
 */
 #include <stdio.h>
 #include <math.h>
 #include <assert.h>
+#include <string.h>
 #include <mem.h>
 #include <matrix.h>
 
@@ -28,9 +29,9 @@ void _gramSchmidtQR(Matrix A, Matrix QR[2], MatrixStack mem_stacks[2], int debug
 
   MatrixStack stackMxNd1 = mem_stacks[0];
   MatrixStack stackNx1d1 = mem_stacks[1];
-  
+
   Matrix Q_t = popMatrixStack(stackMxNd1);
-  Matrix cur_proj = popMatrixStack(stackNx1d1);  
+  Matrix cur_proj = popMatrixStack(stackNx1d1);
 
   Matrix Q = QR[0];
   Matrix R = QR[1];
@@ -151,10 +152,10 @@ void _hhReflectionsQR(Matrix A, Matrix QR[2],
       printf("norm=%.10f\n", v->values[i][0]);
       printf("aii=%.10f\n", v->values[i][0]);
     }
-    
+
     if (x->values[i][0] > 0)
       v->values[i][0] = v->values[i][0] * -1;
-    
+
     subtractColumn(x, 0, v, 0);
 
     if (debug)
@@ -211,7 +212,7 @@ void hhReflectionsQR(Matrix A, Matrix QR[2],
     allocMatrixStack(A->n, A->m, 4),
     allocMatrixStack(A->n, 1, 2)
   };
-  
+
   _hhReflectionsQR(A, QR, mem_stacks, debug);
 
   freeMatrixStack(mem_stacks[0]);
@@ -219,48 +220,65 @@ void hhReflectionsQR(Matrix A, Matrix QR[2],
 }
 
 
+/*
+  Gaussian Elimination
 
-
-
-int main()
+*/
+void gaussianElimination(Matrix A, Matrix B, Matrix RREF[2], int debug)
 {
-  MatrixStack stack = allocMatrixStack(5,5,4);
-  
-  Matrix A = popMatrixStack(stack);
-  Matrix QR[2] = {popMatrixStack(stack),
-                  popMatrixStack(stack)};
-  Matrix _A = popMatrixStack(stack);
-  
-  setMatrixValues(10, 'R', A);
 
-  printf("A=\n");
-  drawMatrix(A);
-  
-  hhReflectionsQR(A, QR, 0);
-  
-  printf("Q=\n");
-  drawMatrix(QR[0]);
-  printf("R=\n");
-  drawMatrix(QR[1]);
+  Matrix _A = RREF[0];
+  copyMatrix(A, _A);
+  printf("copied A");
+  Matrix _B = RREF[1];
+  copyMatrix(B, _B);
 
-  multiplyMatrices(QR[0], QR[1], _A);
-  printf("QR=\n");
-  drawMatrix(_A);
+  Matrix a_scratch = allocMatrix(1, _A->m);
+  Matrix b_scratch = allocMatrix(1, _B->m);
 
-  subtractMatrix(A, _A);
-  absMatrix(A);
-  double mean = meanMatrix(A);
-  printf("Q - QR=\n");
-  drawMatrix(A);
+  double max_pivot_value, scalar;
+  int max_pivot_index;
+  for (int i=0; i<_A->m; i++)
+  {
+    // pivot
+    if (debug)
+      printf("ITERATION %d BEGIN", i);
+    max_pivot_value = _A->values[i][i];
+    max_pivot_index = i;
+    for (int j=i+1; j<_A->n; i++)
+    {
+      if (fabs(_A->values[j][i]) > max_pivot_value)
+      {
+        max_pivot_value = fabs(_A->values[j][i]);
+        max_pivot_index = j;
+      }
+    }
 
-  printf("Mean Error=\n");
-  printf("%.6f\n", mean);
+    if (debug)
+    {
+      printf("row %d (%.5f) -> row 0", max_pivot_index, max_pivot_value);
+    }
+    if (max_pivot_index != 0)
+    {
+      switchRow(_A, 0, max_pivot_index);
+      switchRow(_A, 0, max_pivot_index);
+    }
 
-  pushMatrixStack(stack, QR[0]);
-  pushMatrixStack(stack, QR[1]);
-  pushMatrixStack(stack, A);
-  pushMatrixStack(stack, _A);
-  freeMatrixStack(stack);
+    for (int j=i+1; j<_A->n-i; i++)
+    {
+      if (_A->values[j][i] != 0)
+      {
+        scalar = _A->values[j][i] / _A->values[i][i];
+        copyRow(_A, i, a_scratch, 0);
+        scaleMatrix(a_scratch, scalar);
+        subtractRow(_A, j, a_scratch, 0);
 
-  return 0;
+        copyRow(_B, i, b_scratch, 0);
+        scaleMatrix(b_scratch, scalar);
+        subtractRow(_B, j, b_scratch, 0);
+      }
+    }
+  }
+  freeMatrix(b_scratch);
+  freeMatrix(a_scratch);
 }
