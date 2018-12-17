@@ -6,9 +6,9 @@ ODIR=$(SDIR)/obj
 LDIR=lib
 BDIR=bin
 
-CFLAGS=-I$(IDIR)
+CFLAGS=-I$(IDIR) -g -Wall -Wextra
 
-LIBS=""
+LIBS="-lm"
 
 _DEPS = mem.h matrix.h factorization.h
 DEPS = $(patsubst %,$(IDIR)/%,$(_DEPS))
@@ -23,11 +23,10 @@ $(ODIR)/%.o: $(SDIR)/%.c $(DEPS)
 $(BDIR)/linalg: $(OBJ)
 	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
 
-test:
-	./$(BDIR)/linalg ge -v
-
-
 .PHONY: clean
 
 clean:
 	rm -f $(ODIR)/*.o *~ core $(INCDIR)/*~
+
+gdb:
+	gdb $(BDIR)/linalg

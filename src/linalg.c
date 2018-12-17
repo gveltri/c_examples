@@ -66,12 +66,7 @@ void qr(char method, int debug)
   printf("Mean Error=\n");
   printf("%.6f\n", mean);
 
-  pushMatrixStack(stack, QR[0]);
-  pushMatrixStack(stack, QR[1]);
-  pushMatrixStack(stack, A);
-  pushMatrixStack(stack, _A);
-  freeMatrixStack(stack);
-
+  freeMatrixStackAll(stack);
 }
 
 void ge(int debug)
@@ -94,10 +89,7 @@ void ge(int debug)
   printf("B=\n");
   drawMatrix(B);
 
-  copyMatrix(A, RREF[0]);
-  printf("copied A to RREF[0]");
-
-  gaussianElimination(A, B, RREF, 0);
+  gaussianElimination(A, B, RREF, debug);
 
   printf("A^=\n");
   drawMatrix(RREF[0]);
@@ -105,12 +97,7 @@ void ge(int debug)
   printf("B^=\n");
   drawMatrix(RREF[1]);
 
-  pushMatrixStack(stack, RREF[0]);
-  pushMatrixStack(stack, RREF[1]);
-  pushMatrixStack(stack, A);
-  pushMatrixStack(stack, B);
-  freeMatrixStack(stack);
-
+  freeMatrixStackAll(stack);
 }
 
 
@@ -143,12 +130,12 @@ int main(int argc, char *argv[])
   }
   else
   {
-    char message[(24*sizeof(char)) + sizeof(argv[1])];
+    char message[100];
     strcat(message, "command not recognized: ");
     strcat(message, argv[1]);
     printHelp(message);
     return 1;
   }
-
+  
   return 0;
 }

@@ -34,6 +34,7 @@ void freeMatrix(Matrix matrix);
 MatrixStack allocMatrixStack(int n, int m, int depth);
 Matrix popMatrixStack(MatrixStack stack);
 void pushMatrixStack(MatrixStack stack, Matrix matrix);
+void freeMatrixStackAll(MatrixStack stack);
 void freeMatrixStack(MatrixStack stack);
 
 #endif

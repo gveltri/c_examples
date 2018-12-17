@@ -38,7 +38,6 @@ void _gramSchmidtQR(Matrix A, Matrix QR[2], MatrixStack mem_stacks[2], int debug
   copyMatrix(A, Q);
 
   /* get orthonormal basis */
-  double _norm;
   for (int i=0; i<A->m; i++)
   {
 
@@ -74,8 +73,6 @@ void _gramSchmidtQR(Matrix A, Matrix QR[2], MatrixStack mem_stacks[2], int debug
   transposeMatrix(Q, Q_t); /* combine into one step with transposeMultiply */
   multiplyMatrices(Q_t, A, R);
 
-  pushMatrixStack(stackNx1d1, cur_proj);
-  pushMatrixStack(stackMxNd1, Q_t);
 }
 
 void gramSchmidtQR(Matrix A, Matrix QR[2], int debug)
@@ -87,8 +84,8 @@ void gramSchmidtQR(Matrix A, Matrix QR[2], int debug)
 
   _gramSchmidtQR(A, QR, mem_stacks, debug);
 
-  freeMatrixStack(mem_stacks[0]);
-  freeMatrixStack(mem_stacks[1]);
+  freeMatrixStackAll(mem_stacks[0]);
+  freeMatrixStackAll(mem_stacks[1]);
 }
 
 
@@ -197,12 +194,6 @@ void _hhReflectionsQR(Matrix A, Matrix QR[2],
   }
 
   transposeMatrix(Q, QR[0]);
-
-  pushMatrixStack(stackNxNd4, Q);
-  pushMatrixStack(stackNxNd4, I);
-
-  pushMatrixStack(stackNx1d2,v);
-  pushMatrixStack(stackNx1d2,x);
 }
 
 void hhReflectionsQR(Matrix A, Matrix QR[2],
@@ -215,8 +206,8 @@ void hhReflectionsQR(Matrix A, Matrix QR[2],
 
   _hhReflectionsQR(A, QR, mem_stacks, debug);
 
-  freeMatrixStack(mem_stacks[0]);
-  freeMatrixStack(mem_stacks[1]);
+  freeMatrixStackAll(mem_stacks[0]);
+  freeMatrixStackAll(mem_stacks[1]);
 }
 
 
@@ -229,7 +220,6 @@ void gaussianElimination(Matrix A, Matrix B, Matrix RREF[2], int debug)
 
   Matrix _A = RREF[0];
   copyMatrix(A, _A);
-  printf("copied A");
   Matrix _B = RREF[1];
   copyMatrix(B, _B);
 
@@ -240,12 +230,15 @@ void gaussianElimination(Matrix A, Matrix B, Matrix RREF[2], int debug)
   int max_pivot_index;
   for (int i=0; i<_A->m; i++)
   {
-    // pivot
     if (debug)
-      printf("ITERATION %d BEGIN", i);
+    {
+      printf("ITERATION %d BEGIN\n", i);
+    }
+    
+    // pivot
     max_pivot_value = _A->values[i][i];
     max_pivot_index = i;
-    for (int j=i+1; j<_A->n; i++)
+    for (int j=i+1; j<_A->n; j++)
     {
       if (fabs(_A->values[j][i]) > max_pivot_value)
       {
@@ -256,7 +249,7 @@ void gaussianElimination(Matrix A, Matrix B, Matrix RREF[2], int debug)
 
     if (debug)
     {
-      printf("row %d (%.5f) -> row 0", max_pivot_index, max_pivot_value);
+      printf("row %d (%.5f) -> row %d\n", max_pivot_index, max_pivot_value, i);
     }
     if (max_pivot_index != 0)
     {
@@ -264,7 +257,7 @@ void gaussianElimination(Matrix A, Matrix B, Matrix RREF[2], int debug)
       switchRow(_A, 0, max_pivot_index);
     }
 
-    for (int j=i+1; j<_A->n-i; i++)
+    for (int j=i+1; j<_A->n-i; j++)
     {
       if (_A->values[j][i] != 0)
       {
@@ -277,6 +270,12 @@ void gaussianElimination(Matrix A, Matrix B, Matrix RREF[2], int debug)
         scaleMatrix(b_scratch, scalar);
         subtractRow(_B, j, b_scratch, 0);
       }
+    }
+    if (debug)
+    {
+      printf("ITERATION %d END\n", i);
+      drawMatrix(_A);
+      drawMatrix(_B);
     }
   }
   freeMatrix(b_scratch);

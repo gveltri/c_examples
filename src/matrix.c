@@ -158,11 +158,9 @@ double meanMatrix(Matrix matrix)
 
 int numDigits(int n)
 {
-  int add = 0;
   if (n < 0)
     n = n * -1;
-
-  if (n < 1)
+  else if (n == 0)
     n = 1;
   else
     n = floor(log10(n)) + 1;

@@ -74,19 +74,36 @@ void pushMatrixStack(MatrixStack stack, Matrix matrix)
   stack->cur_depth++;
 }
 
-void freeMatrixStack(MatrixStack stack)
+/* 
+   freeMatrixStackAll
+
+   frees all initialized matrices from stack 
+   frees stack
+*/
+void freeMatrixStackAll(MatrixStack stack)
 {
-  if (stack->cur_depth == 0)
+  while (stack->depth > 0)
   {
-    free(stack);
-    return;
+    freeMatrix(*(stack->matrices++));
+    stack->depth--;
   }
 
-  do
+  free(stack);
+}
+
+/* 
+   freeMatrixStack
+
+   frees remaining matrices from stack 
+   frees stack
+*/
+void freeMatrixStack(MatrixStack stack)
+{
+  while (stack->cur_depth > 0)
   {
     freeMatrix(*(stack->top--));
     stack->cur_depth--;
-  } while (stack->cur_depth > 0);
+  }
 
   free(stack);
 }
