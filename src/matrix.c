@@ -12,8 +12,8 @@
 
 /* constants for rendering tables */
 const int PADDING = 1;
-const int PRECISION = 6;
-const char *FORMATTING  = "%.6f";
+const int PRECISION = 3;
+const char *FORMATTING  = "%.3f";
 
 void setMatrixValues(double value, char type, Matrix matrix)
 {
@@ -109,30 +109,27 @@ void transposeMatrix(Matrix source, Matrix target)
   }
 }
 
-double maxValue(int m, double *array)
+double matrixMax(Matrix matrix, int _abs)
 {
-  int max = array[0];
+  double max, curr;
 
-  for (int i=1; i < m; i++)
+  for (int i=0; i < matrix->n; i++)
   {
-    if (max < array[i])
-      max = array[i];
+    for (int j=0; j < matrix->m; j++)
+    {
+      if ((i==0) & (j==0))
+      {
+        max = matrix->values[0][0];
+        if (_abs)
+            max = fabs(max);
+      }
+
+      curr = matrix->values[i][j];
+      if (_abs) curr = fabs(curr);
+
+      if (max < curr) max = curr;
+    }
   }
-
-  return max;
-}
-
-double matrixMax(Matrix matrix)
-{
-  double max = maxValue(matrix->m, matrix->values[0]);
-
-  for (int i=1; i < matrix->n; i++)
-  {
-    double curr = maxValue(matrix->m, matrix->values[i]);
-    if (max < curr)
-      max = curr;
-  }
-
   return max;
 }
 
@@ -158,14 +155,19 @@ double meanMatrix(Matrix matrix)
 
 int numDigits(int n)
 {
+  int add = 0;
   if (n < 0)
+  {
     n = n * -1;
-  else if (n == 0)
+    add++;
+  }
+
+  if (n == 0)
     n = 1;
   else
     n = floor(log10(n)) + 1;
 
-  return n;
+  return n+add;
 }
 
 int numDigitsDouble(double x)
@@ -173,22 +175,22 @@ int numDigitsDouble(double x)
   int n = floor(x);
 
   n = numDigits(n);
-  if (x < 0) n++;
 
   return n;
 }
 
 void drawMatrix(Matrix matrix)
 {
-  double matrix_max = matrixMax(matrix);
+  double matrix_max = matrixMax(matrix, 1);
   int max_width = numDigitsDouble(matrix_max);
-  max_width = max_width + PADDING + PRECISION - 1;
+  max_width = max_width + PADDING + PRECISION;
 
    /* header */
+  int offset = numDigits(matrix->n) + numDigits(matrix->m);
+  int blank_fill;
+
   printf("\n");
   printf("(%d, %d) ", matrix->n, matrix->m);
-  int offset = numDigits(matrix->n) + numDigits(matrix->m) + 5;
-
   for (int i=offset; i<(max_width*matrix->m); i++)
   {
     printf("-");
@@ -197,7 +199,7 @@ void drawMatrix(Matrix matrix)
   for (int i=0; i<matrix->n; i++)
   {
     printf("\n");
-    for (int j=0; j<PADDING; j++)
+    for (int j=0; j<max_width/2; j++)
     {
       printf("\n");
     }
@@ -205,7 +207,9 @@ void drawMatrix(Matrix matrix)
     {
       double value = matrix->values[i][j];
       printf(FORMATTING, value);
-      int blank_fill = max_width - numDigitsDouble(value);
+
+      blank_fill = max_width - numDigitsDouble(value);
+
       for (int i=0; i<blank_fill; i++)
       {
         printf(" ");

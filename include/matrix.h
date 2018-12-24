@@ -26,7 +26,7 @@ void drawMatrix(Matrix matrix);
 
 double sumMatrix(Matrix matrix);
 double meanMatrix(Matrix matrix);
-double matrixMax(Matrix matrix);
+double matrixMax(Matrix matrix, int _abs);
 
 double dotProduct(char orient, Matrix matrix1, int idx1, Matrix matrix2, int idx2);
 double dotProductV(Matrix matrix1, Matrix matrix2);

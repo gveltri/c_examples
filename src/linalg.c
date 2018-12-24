@@ -136,6 +136,6 @@ int main(int argc, char *argv[])
     printHelp(message);
     return 1;
   }
-  
+
   return 0;
 }
