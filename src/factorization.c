@@ -10,27 +10,29 @@
 #include <mem.h>
 #include <matrix.h>
 
+#define MAXIMUM_ZERO_DOUBLE = 0.00000000000001;
 #define min(a,b)				\
 	({ __typeof__ (a) _a = (a);		\
 		__typeof__ (b) _b = (b);	\
 		_a < _b ? _a : _b; })
 
+
+
 /*
   QR Gram Schmidt Process on a Square Matrix
+  
+  less numerically stable than QR with householder reflections
 
-  Memory Allocation
-  -----------------
-
-  input three matrices A, Q, R
-  one scratch matrix of size n,1
-  one scratch matrix of size n,n to store transpose
-
+  @param A matrix to be decomposed
+  @param QR array of matrices, [Q,R], to which results are written
+  @param debug flag for printing matrices during iterations
 */
 void gramSchmidtQR(Matrix A, Matrix QR[2], int debug)
 {
-	assert(A->m == A->n);
-	assert(A->m == QR[0]->m);
-	assert(A->m == QR[0]->n);
+	assert(A->n == QR[0]->n);
+	assert(QR[0]->n == QR[0]->m);
+	assert(A->n == QR[1]->n);
+	assert(A->m == QR[1]->m);
        
 	Matrix Q = QR[0];
 	Matrix R = QR[1];
@@ -39,7 +41,6 @@ void gramSchmidtQR(Matrix A, Matrix QR[2], int debug)
 	/* get orthonormal basis */
 	for (int i=0; i<A->m; i++)
 	{
-
 		if (debug)
 		{
 			printf("ITERATION %d", i);
@@ -49,11 +50,12 @@ void gramSchmidtQR(Matrix A, Matrix QR[2], int debug)
 		for (int j=0; j<i; j++)
 		{
 			/* scale projection and add to matrix */
-			project(Q, i, Q, j, -1, Q, i, 0);
+			project(Q, i, Q, j, -1.0, Q, i, 1.0);
 
 			if (debug)
 			{
 				printf("ITERATION %d, %d", i, j);
+				drawMatrix(Q);
 			}
 		}
 
@@ -63,36 +65,42 @@ void gramSchmidtQR(Matrix A, Matrix QR[2], int debug)
 		{
 			drawMatrix(Q);
 			printf("ITERATION END %d\n", i);
-
 		}
-
 	}
 
+	/* get R from orthogonal matrix Q transpose times A */
 	multiplyMatrices(Q, 1, A, 0, R, 0);
 }
 
 /*
-  QR with Householder Reflections on a Symmetric Matrix
+  QR with Householder Reflections on an NxM Matrix
 
   Memory Allocation
   -----------------
 
-  input three matrices A, Q, R
-  four matrices of size (n,n) for each step Qi
-  - identity
-  - outer product
-  - Q transpose
-  - Q result
+  input three matrices A nxm, Q nxn, R nxm
+  four matrices for each step Qti
+  - identity, nxn
+  - outer product, nxn
+  - Q transpose, nxn
+  - Q chained transpose, nxn
   two matrices size (n,1) for v and x
+
+  @param A matrix to be decomposed
+  @param QR array of matrices, [Q,R], to which results are written
+  @param mem_stacks array of two memory stacks for recyling scratch matrices
+  @param debug flag for printing matrices during iterations
 
 */
 void _hhReflectionsQR(Matrix A, Matrix QR[2],
 		      MatrixStack mem_stacks[2],
-		      int debug) {
+		      int debug)
+{
 
-	assert(A->m == A->n);
-	assert(A->m == QR[0]->m);
-	assert(A->m == QR[0]->n);
+	assert(A->n == QR[0]->n);
+	assert(QR[0]->n == QR[0]->m);
+	assert(A->n == QR[1]->n);
+	assert(A->m == QR[1]->m);
 
 	Matrix Qn, Qt;
 	MatrixStack stackNxNd4 = mem_stacks[0];
@@ -106,13 +114,14 @@ void _hhReflectionsQR(Matrix A, Matrix QR[2],
 	Matrix I = popMatrixStack(stackNxNd4); /* make I type of Matrix with low mem usage */
 	setMatrixValues(1, 'I', I);
 
-	copyMatrix(A,QR[1]);
+	copyMatrix(A, QR[1]);
 
 	/*
-	  iterate through all but last column
-	  for symmetric matrix
+	  iterate through all columns if matrix is tall
+	  iterate through all m-1 if matrix is wide or square
 	*/
-	for (int i=0; i<A->m-1; i++)
+	int iterations = min(A->n-1, A->m);
+	for (int i=0; i<iterations; i++)
 	{
 
 		/* get householder vector */
@@ -132,6 +141,7 @@ void _hhReflectionsQR(Matrix A, Matrix QR[2],
 			printf("aii=%.10f\n", v->values[i][0]);
 		}
 
+		/* reverse sign for better precision */
 		if (x->values[i][0] > 0)
 			v->values[i][0] = v->values[i][0] * -1;
 
@@ -162,27 +172,35 @@ void _hhReflectionsQR(Matrix A, Matrix QR[2],
 		pushMatrixStack(stackNxNd4, Qn);
 		Q = Qt;
 
-		simpleMultiplyMatrices(Q, A, QR[1]);
-
 		if (debug)
 		{
 			printf("Q%d(Q..)=\n", i);
 			drawMatrix(Q);
-			printf("Q%d(Q..) * A=\n", i);
-			drawMatrix(QR[1]);
 			printf("ITERATION %d END\n", i);
 		}
 
 	}
 
+	simpleMultiplyMatrices(Q, A, QR[1]);
 	transposeMatrix(Q, QR[0]);
 }
 
-void hhReflectionsQR(Matrix A, Matrix QR[2],
-		     int debug)
+/*
+  QR with Householder Reflections on a Symmetric Matrix
+
+  Allocates and frees memory stacks. It's better to use this version
+  if you're not iteratively calling QR.
+  
+  @param A matrix to be decomposed
+  @param QR array of matrices, [Q,R], to which results are written
+  @param mem_stacks array of two memory stacks for recyling scratch matrices
+  @param debug flag for printing matrices during iterations
+
+*/
+void hhReflectionsQR(Matrix A, Matrix QR[2], int debug)
 {
 	MatrixStack mem_stacks[] = {
-		allocMatrixStack(A->n, A->m, 4),
+		allocMatrixStack(A->n, A->n, 4),
 		allocMatrixStack(A->n, 1, 2)
 	};
 
@@ -192,9 +210,16 @@ void hhReflectionsQR(Matrix A, Matrix QR[2],
 	freeMatrixStackAll(mem_stacks[1]);
 }
 
-
 /*
   Gaussian Elimination
+
+  Given A and B, generate the reduced row echelon form (RREF)
+  Pivoting for improved precision
+
+  @param A left side matrix to be reduced
+  @param B left side of block
+  @param RREF array of matrices to write reduced row form of A and B, [A^,B^]
+  @param debug flag for printing matrices during iterations
 
 */
 void gaussianElimination(Matrix A, Matrix B, Matrix RREF[2], int debug)
@@ -207,7 +232,7 @@ void gaussianElimination(Matrix A, Matrix B, Matrix RREF[2], int debug)
 
 	double max_pivot_value, scalar;
 	int max_pivot_index;
-	int iterations = min(A->n, A->m) - 1;
+	int iterations = min(A->n-1, A->m);
 
 	/* eliminate lower triangle */
 	for (int i=0; i<iterations; i++)
@@ -286,4 +311,43 @@ void gaussianElimination(Matrix A, Matrix B, Matrix RREF[2], int debug)
 		}
 	}
 
+}
+
+/*
+  Back Substitution
+
+  solves Ax = b for x where A and b are given
+  
+  @param A an upper triangular matrix
+  @param b a column vector of values
+  @param solution a column vector, x of Ax=b
+ */
+void backSubstitution(Matrix A, Matrix solution, Matrix b)
+{
+	assert(1 == solution->m);
+	assert(1 == b->m);
+	assert(A->n == b->n);
+	assert(A->n == solution->n);
+	
+	double value, diagonal;
+	for (int i=A->n; i>=0; i--)
+	{
+		value = b[i][0];
+		for (int j=i+1; i<A->n; i++)
+		{
+			value = value - (A->values[i][j] * solution[j][0]);
+		}
+
+		diagonal = A->values[i][i];
+		if ((fabs(diagonal) < MAXIMUM_ZERO_DOUBLE) \
+		    & (fabs(value) > MAXIMUM_ZERO_DOUBLE))
+		{
+			fprintf(stderr,
+				"contradiction A[%d][%d] = %.16f and b[%d] = %.16f",
+				i,i,diagonal,i,value);
+			exit(EXIT_FAILURE);
+		}
+		
+		solution[i][0] = value / diagonal;
+	}
 }

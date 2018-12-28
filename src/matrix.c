@@ -65,7 +65,7 @@ void copyMatrix(Matrix source, Matrix target)
 
 void copyColumn(Matrix source, int idx_s, Matrix target, int idx_t)
 {
-	for (int i=0;i<target->n;i++)
+	for (int i=0;i<source->n;i++)
 	{
 		target->values[i][idx_t] = source->values[i][idx_s];
 	}
@@ -417,7 +417,7 @@ void project(Matrix source1, int idx1, Matrix source2, int idx2, double proj_sca
 		st_dot = 0;
 	else
 		st_dot = st_dot / norm_squared;
-	
+
 	for (int i=0; i<source1->n; i++)
 	{
 		target->values[i][idx_t] = (proj_scalar * source2->values[i][idx2] * st_dot) + \

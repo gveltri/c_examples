@@ -24,14 +24,15 @@ void printHelp(char message[])
 
 void qr(char method, int debug)
 {
-	MatrixStack stack = allocMatrixStack(5,5,4);
+	MatrixStack stackNxM = allocMatrixStack(10,2,3);
+	MatrixStack stackNxN = allocMatrixStack(10,10,1);
 
-	Matrix A = popMatrixStack(stack);
+	Matrix A = popMatrixStack(stackNxM);
 	Matrix QR[] = {
-		popMatrixStack(stack),
-		popMatrixStack(stack)
+		popMatrixStack(stackNxN),
+		popMatrixStack(stackNxM)
 	};
-	Matrix _A = popMatrixStack(stack);
+	Matrix _A = popMatrixStack(stackNxM);
 
 	setMatrixValues(2, 'R', A);
 
@@ -60,13 +61,17 @@ void qr(char method, int debug)
 	subtractMatrix(A, _A);
 	absMatrix(A);
 	double mean = meanMatrix(A);
-	printf("Q - QR=\n");
+	double max = matrixMax(A, 1);
+	printf("A - QR=\n");
 	drawMatrix(A);
 
 	printf("Mean Error=\n");
-	printf("%.6f\n", mean);
+	printf("%.16f\n", mean);
+	printf("Max Error=\n");
+	printf("%.16f\n", max);
 
-	freeMatrixStackAll(stack);
+	freeMatrixStackAll(stackNxM);
+	freeMatrixStackAll(stackNxN);
 }
 
 void ge(int debug)
