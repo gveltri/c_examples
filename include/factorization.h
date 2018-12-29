@@ -16,6 +16,6 @@ void hhReflectionsQR(Matrix A, Matrix QR[2],
 
 void gaussianElimination(Matrix A, Matrix B, Matrix RREF[2], int debug);
 
-void backSubstitution(Matrix A, Matrix solution, Matrix b)
+void backSubstitution(Matrix A, Matrix solution, Matrix b);
 
 #endif

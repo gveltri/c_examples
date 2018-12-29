@@ -4,19 +4,19 @@
   Factorization and Related Algorithms
 */
 #include <stdio.h>
+#include <stdlib.h>
 #include <math.h>
 #include <assert.h>
 #include <string.h>
 #include <mem.h>
 #include <matrix.h>
 
-#define MAXIMUM_ZERO_DOUBLE = 0.00000000000001;
 #define min(a,b)				\
 	({ __typeof__ (a) _a = (a);		\
 		__typeof__ (b) _b = (b);	\
 		_a < _b ? _a : _b; })
 
-
+#define MAXIMUM_ZERO_DOUBLE 0.00000000000001
 
 /*
   QR Gram Schmidt Process on a Square Matrix
@@ -332,15 +332,14 @@ void backSubstitution(Matrix A, Matrix solution, Matrix b)
 	double value, diagonal;
 	for (int i=A->n; i>=0; i--)
 	{
-		value = b[i][0];
+		value = b->values[i][0];
 		for (int j=i+1; i<A->n; i++)
 		{
-			value = value - (A->values[i][j] * solution[j][0]);
+			value = value - (A->values[i][j] * solution->values[j][0]);
 		}
 
 		diagonal = A->values[i][i];
-		if ((fabs(diagonal) < MAXIMUM_ZERO_DOUBLE) \
-		    & (fabs(value) > MAXIMUM_ZERO_DOUBLE))
+		if ((fabs(diagonal) < MAXIMUM_ZERO_DOUBLE) & (fabs(value) > MAXIMUM_ZERO_DOUBLE))
 		{
 			fprintf(stderr,
 				"contradiction A[%d][%d] = %.16f and b[%d] = %.16f",
@@ -348,6 +347,6 @@ void backSubstitution(Matrix A, Matrix solution, Matrix b)
 			exit(EXIT_FAILURE);
 		}
 		
-		solution[i][0] = value / diagonal;
+		solution->values[i][0] = value / diagonal;
 	}
 }
