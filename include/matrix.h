@@ -6,6 +6,7 @@
 #ifndef MATRIX_HEADER
 #define MATRIX_HEADER
 
+void fillMatrix(double values[], Matrix matrix);
 void setMatrixValues(double value, char type, Matrix matrix);
 void copyMatrix(Matrix source, Matrix target);
 void copyRow(Matrix source, int idx_s, Matrix target, int idx_t);
@@ -27,8 +28,8 @@ void addRowScalarMultiple(Matrix target, int idx_t, double scalar, Matrix source
 
 void drawMatrix(Matrix matrix);
 
-double sumMatrix(Matrix matrix);
-double meanMatrix(Matrix matrix);
+double sumMatrix(Matrix matrix, int _abs);
+double meanMatrix(Matrix matrix, int _abs);
 double matrixMax(Matrix matrix, int _abs);
 
 double dotProduct(char orient, Matrix matrix1, int idx1, Matrix matrix2, int idx2);

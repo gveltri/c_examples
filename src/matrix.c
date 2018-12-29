@@ -15,6 +15,17 @@ const int PADDING = 1;
 const int PRECISION = 3;
 const char *FORMATTING  = "%.3f";
 
+void fillMatrix(double values[], Matrix matrix)
+{
+	for (int i=0;i<matrix->n;i++)
+	{
+		for (int j=0;j<matrix->m;j++)
+		{
+			matrix->values[i][j] = values[(i*matrix->m)+j];
+		}
+	}
+}
+
 void setMatrixValues(double value, char type, Matrix matrix)
 {
 	for (int i=0;i<matrix->n;i++)
@@ -133,22 +144,27 @@ double matrixMax(Matrix matrix, int _abs)
 	return max;
 }
 
-double sumMatrix(Matrix matrix)
+double sumMatrix(Matrix matrix, int _abs)
 {
 	double sum = 0;
+	double value;
 	for (int i=0;i<matrix->n;i++)
 	{
 		for (int j=0;j<matrix->m;j++)
 		{
-			sum = matrix->values[i][j];
+			value = matrix->values[i][j];
+			if (_abs)
+				sum = sum + fabs(value);
+			else
+				sum = sum + value;
 		}
 	}
 	return sum;
 }
 
-double meanMatrix(Matrix matrix)
+double meanMatrix(Matrix matrix, int _abs)
 {
-	double sum = sumMatrix(matrix);
+	double sum = sumMatrix(matrix, _abs);
 	return sum / (matrix->n * matrix->m);
 }
 

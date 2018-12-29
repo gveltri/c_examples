@@ -330,10 +330,10 @@ void backSubstitution(Matrix A, Matrix solution, Matrix b)
 	assert(A->n == solution->n);
 	
 	double value, diagonal;
-	for (int i=A->n; i>=0; i--)
+	for (int i=A->n-1; i>=0; i--)
 	{
 		value = b->values[i][0];
-		for (int j=i+1; i<A->n; i++)
+		for (int j=i+1; j<A->n; j++)
 		{
 			value = value - (A->values[i][j] * solution->values[j][0]);
 		}

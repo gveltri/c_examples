@@ -10,10 +10,10 @@ CFLAGS=-I$(IDIR) -g -Wall -Wextra
 
 LIBS="-lm"
 
-_DEPS = mem.h matrix.h factorization.h
+_DEPS = mem.h matrix.h factorization.h estimation.h precision.h
 DEPS = $(patsubst %,$(IDIR)/%,$(_DEPS))
 
-_OBJ = matrix.o mem.o factorization.o linalg.o
+_OBJ =  mem.o matrix.o factorization.o estimation.o precision.o linalg.o
 OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 
 

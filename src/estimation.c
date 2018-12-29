@@ -10,7 +10,6 @@
 #include <matrix.h>
 #include <factorization.h>
 
-
 /*
   Ordinary Least Squares
 
@@ -42,7 +41,7 @@ void ordinaryLeastSquares(Matrix A, Matrix x, Matrix b)
 
 	hhReflectionsQR(A, QR, 0);
 
-	matrixMultiply(QR[0], 1, b, 0, Qtb, 0);
+	multiplyMatrices(QR[0], 1, b, 0, Qtb, 0);
 
 	backSubstitution(A, x, Qtb);
 

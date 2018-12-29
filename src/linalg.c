@@ -9,6 +9,7 @@
 #include <mem.h>
 #include <matrix.h>
 #include <factorization.h>
+#include <precision.h>
 
 void printHelp(char message[])
 {
@@ -58,17 +59,10 @@ void qr(char method, int debug)
 	printf("QR=\n");
 	drawMatrix(_A);
 
-	subtractMatrix(A, _A);
-	absMatrix(A);
-	double mean = meanMatrix(A);
-	double max = matrixMax(A, 1);
-	printf("A - QR=\n");
-	drawMatrix(A);
-
-	printf("Mean Error=\n");
-	printf("%.16f\n", mean);
-	printf("Max Error=\n");
-	printf("%.16f\n", max);
+	double stats[2];
+	matrixComparison(A, _A, stats);
+	printf("Mean Error = %.16f\n", stats[0]);
+	printf("Max Error = %.16f\n", stats[1]);
 
 	freeMatrixStackAll(stackNxM);
 	freeMatrixStackAll(stackNxN);
@@ -108,9 +102,60 @@ void ge(int debug)
 	printf("AA-1=\n");
 	drawMatrix(C);
 
+	double stats[2];
+	identityPrecision(C, stats);
+	printf("Mean Error=%.16f\n", stats[0]);
+	printf("Max Error=%.16f\n", stats[1]);
+
 	freeMatrixStackAll(stack);
 }
 
+void bs()
+{
+	Matrix A = allocMatrix(10,10);
+
+	MatrixStack stack = allocMatrixStack(10,1,3);
+	Matrix b = popMatrixStack(stack);
+	Matrix solution = popMatrixStack(stack);
+	Matrix _b = popMatrixStack(stack);
+
+	double values[] = {
+		1, 0, 5, 0, 9, 0, 3, 0, 9, 9,
+		0, 3, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 1, 0, 0, 7, 0, 0, 9, 0,
+		0, 0, 0, 1, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 1, 0, 4, 0, 0, 0,
+		0, 0, 0, 0, 0, 8, 0, 0, 0, 2,
+		0, 0, 0, 0, 0, 0, 1, 6, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 1, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0, 2, 0,
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 8
+	};
+
+	fillMatrix(values, A);
+	double _values[] = {
+		7.0, 8.0, 5.5, 9.7, 9.1, 0.8, 3.1, 0.2, 9.9, 9.0,
+	};
+	fillMatrix(_values, b);
+
+	backSubstitution(A, solution, b);
+
+	drawMatrix(A);
+	drawMatrix(b);
+	drawMatrix(solution);
+	simpleMultiplyMatrices(A, solution, _b);
+	drawMatrix(_b);
+	subtractMatrix(_b, b);
+	drawMatrix(_b);
+
+	freeMatrix(A);
+	freeMatrixStackAll(stack);
+}
+
+void ols()
+{
+	printf("filler");
+}
 
 int main(int argc, char *argv[])
 {
@@ -138,6 +183,14 @@ int main(int argc, char *argv[])
 	else if (strcmp(argv[1], "ge") == 0)
 	{
 		ge(debug);
+	}
+	else if (strcmp(argv[1], "bs") == 0)
+	{
+		bs();
+	}
+	else if (strcmp(argv[1], "ols") == 0)
+	{
+		ols();
 	}
 	else
 	{
