@@ -9,6 +9,7 @@
 #include <mem.h>
 #include <matrix.h>
 #include <factorization.h>
+#include <estimation.h>
 #include <precision.h>
 
 void printHelp(char message[])
@@ -19,7 +20,12 @@ void printHelp(char message[])
 		"---------\n\n"
 		"qrhh: QR factorization with Householder reduction\n"
 		"qrgs: QR factorization with Gram-Schmidt method\n"
-		"ge: Gaussian Elimination with Pivots\n\n"
+		"ge: Gaussian elimination with pivots\n"
+		"bs: Back substitution\n"
+		"ols: Ordinary least squares\n\n"
+		"Options:\n"
+		"--------\n\n"
+		"-v: verbose\n\n"
 		);
 }
 
@@ -154,7 +160,28 @@ void bs()
 
 void ols()
 {
-	printf("filler");
+
+	Matrix A = allocMatrix(10, 2);
+	Matrix x = allocMatrix(3, 1);
+	Matrix b = allocMatrix(10, 1);
+
+	setMatrixValues(2, 'R', A);
+	setMatrixValues(2, 'R', b);
+
+	printf("A=\n");
+	drawMatrix(A);
+
+	printf("b=\n");
+	drawMatrix(x);
+
+	linearRegression(A,x,b);
+	
+	printf("x=\n");
+	drawMatrix(x);
+
+	freeMatrix(A);
+	freeMatrix(b);
+	freeMatrix(x);
 }
 
 int main(int argc, char *argv[])

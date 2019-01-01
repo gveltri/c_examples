@@ -16,8 +16,11 @@
   Using QR decomposition for speed and
   numerical stability
 
+  Given:
+  ------
   At * A * x = At * b
   A = QR
+
   (QR)t * QR * x = (QR)t * b
   Rt * Qt * Q * R * x = Rt * Qt * b
   Rt * R * x = Rt * Qt * b
@@ -65,10 +68,9 @@ void linearRegression(Matrix A, Matrix x, Matrix b)
 	copyMatrix(A, _A);
 	for (int i=0; i<_A->n; i++)
 	{
-		_A->values[i][_A->m] = 1;
+		_A->values[i][_A->m-1] = 1;
 	}
 
 	ordinaryLeastSquares(_A, x, b);
-	
 	freeMatrix(_A);
 }
