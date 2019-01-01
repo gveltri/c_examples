@@ -12,6 +12,8 @@
 #include <estimation.h>
 #include <precision.h>
 
+const float SIZE_N = 5;
+
 void printHelp(char message[])
 {
 	printf("%s\n\n", message);
