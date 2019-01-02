@@ -44,3 +44,19 @@ Appends a column of ones to A before calling ordinaryLeastSquares.
 *in development*
 * eigenvalueQR: Av = λv
 
+
+## Build and Use
+
+To compile for your operating system:
+```
+cd linalg/
+make
+```
+
+For demonstration purposes, the cli may be called with verbose flag:
+
+```
+bin/linalg ols -v
+```
+
+will demonstrate ordinary least squares.
