@@ -20,8 +20,10 @@
 
 /*
   QR Gram Schmidt Process on a Square Matrix
-  
-  less numerically stable than QR with householder reflections
+
+  Decomposes a matrix into an orthogonal Matrix, Q, and upper triangular
+  matrix, R
+  Less numerically stable than QR with householder reflections
 
   @param A matrix to be decomposed
   @param QR array of matrices, [Q,R], to which results are written
@@ -228,6 +230,8 @@ void hhReflectionsQR(Matrix A, Matrix QR[2], int debug)
 */
 void gaussianElimination(Matrix A, Matrix B, Matrix RREF[2], int debug)
 {
+	assert(A->n == A->m);
+	assert(A->n == B->n);
 
 	Matrix _A = RREF[0];
 	copyMatrix(A, _A);
