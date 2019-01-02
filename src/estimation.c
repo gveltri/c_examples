@@ -42,14 +42,19 @@ void ordinaryLeastSquares(Matrix A, Matrix x, Matrix b)
 		allocMatrix(A->n, A->m),
 	};
 
-	hhReflectionsQR(A, QR, 0);
+	gramSchmidtQR(A, QR, 0);
 
 	multiplyMatrices(QR[0], 1, b, 0, Qtb, 0);
 
-	backSubstitution(A, x, Qtb);
+	drawMatrix(QR[1]);
+	drawMatrix(x);
+	drawMatrix(Qtb);
+
+	backSubstitution(QR[1], x, Qtb);
 
 	freeMatrix(QR[0]);
 	freeMatrix(QR[1]);
+	freeMatrix(Qtb);
 }
 
 /*

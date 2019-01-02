@@ -176,6 +176,10 @@ void _hhReflectionsQR(Matrix A, Matrix QR[2],
 		{
 			printf("Q%d(Q..)=\n", i);
 			drawMatrix(Q);
+			
+			simpleMultiplyMatrices(Q, A, QR[1]);
+			printf("R=\n");
+			drawMatrix(QR[1]);
 			printf("ITERATION %d END\n", i);
 		}
 
@@ -193,7 +197,6 @@ void _hhReflectionsQR(Matrix A, Matrix QR[2],
   
   @param A matrix to be decomposed
   @param QR array of matrices, [Q,R], to which results are written
-  @param mem_stacks array of two memory stacks for recyling scratch matrices
   @param debug flag for printing matrices during iterations
 
 */
@@ -206,7 +209,8 @@ void hhReflectionsQR(Matrix A, Matrix QR[2], int debug)
 
 	_hhReflectionsQR(A, QR, mem_stacks, debug);
 
-	freeMatrixStackAll(mem_stacks[0]);
+	/* pointer dereference error */
+	/* freeMatrixStackAll(mem_stacks[0]); */
 	freeMatrixStackAll(mem_stacks[1]);
 }
 
@@ -327,13 +331,13 @@ void backSubstitution(Matrix A, Matrix solution, Matrix b)
 	assert(1 == solution->m);
 	assert(1 == b->m);
 	assert(A->n == b->n);
-	assert(A->n == solution->n);
+	assert(A->m == solution->n);
 	
 	double value, diagonal;
-	for (int i=A->n-1; i>=0; i--)
+	for (int i=A->m-1; i>=0; i--)
 	{
 		value = b->values[i][0];
-		for (int j=i+1; j<A->n; j++)
+		for (int j=i+1; j<A->m; j++)
 		{
 			value = value - (A->values[i][j] * solution->values[j][0]);
 		}
@@ -342,7 +346,7 @@ void backSubstitution(Matrix A, Matrix solution, Matrix b)
 		if ((fabs(diagonal) < MAXIMUM_ZERO_DOUBLE) & (fabs(value) > MAXIMUM_ZERO_DOUBLE))
 		{
 			fprintf(stderr,
-				"contradiction A[%d][%d] = %.16f and b[%d] = %.16f",
+				"contradiction A[%d][%d] = %.16f and b[%d] = %.16f\n",
 				i,i,diagonal,i,value);
 			exit(EXIT_FAILURE);
 		}

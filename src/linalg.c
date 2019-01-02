@@ -12,7 +12,10 @@
 #include <estimation.h>
 #include <precision.h>
 
-const float SIZE_N = 5;
+const float SIZE_N = 20;
+const float SIZE_M = 4;
+const char METHOD = 'R';
+const float RANGE = 5;
 
 void printHelp(char message[])
 {
@@ -33,8 +36,8 @@ void printHelp(char message[])
 
 void qr(char method, int debug)
 {
-	MatrixStack stackNxM = allocMatrixStack(10,2,3);
-	MatrixStack stackNxN = allocMatrixStack(10,10,1);
+	MatrixStack stackNxM = allocMatrixStack(SIZE_N,SIZE_M,3);
+	MatrixStack stackNxN = allocMatrixStack(SIZE_N,SIZE_N,1);
 
 	Matrix A = popMatrixStack(stackNxM);
 	Matrix QR[] = {
@@ -43,7 +46,7 @@ void qr(char method, int debug)
 	};
 	Matrix _A = popMatrixStack(stackNxM);
 
-	setMatrixValues(2, 'R', A);
+	setMatrixValues(RANGE, METHOD, A);
 
 	printf("A=\n");
 	drawMatrix(A);
@@ -78,7 +81,7 @@ void qr(char method, int debug)
 
 void ge(int debug)
 {
-	MatrixStack stack = allocMatrixStack(5,5,5);
+	MatrixStack stack = allocMatrixStack(SIZE_N,SIZE_N,5);
 
 	Matrix A = popMatrixStack(stack);
 	Matrix B = popMatrixStack(stack);
@@ -87,7 +90,7 @@ void ge(int debug)
 		popMatrixStack(stack)
 	};
 
-	setMatrixValues(2, 'R', A);
+	setMatrixValues(RANGE, METHOD, A);
 	setMatrixValues(1, 'I', B);
 
 	printf("A=\n");
@@ -163,18 +166,18 @@ void bs()
 void ols()
 {
 
-	Matrix A = allocMatrix(10, 2);
-	Matrix x = allocMatrix(3, 1);
-	Matrix b = allocMatrix(10, 1);
+	Matrix A = allocMatrix(SIZE_N, SIZE_M);
+	Matrix x = allocMatrix(SIZE_M+1, 1);
+	Matrix b = allocMatrix(SIZE_N, 1);
 
-	setMatrixValues(2, 'R', A);
-	setMatrixValues(2, 'R', b);
+	setMatrixValues(RANGE, METHOD, A);
+	setMatrixValues(RANGE, METHOD, b);
 
 	printf("A=\n");
 	drawMatrix(A);
 
 	printf("b=\n");
-	drawMatrix(x);
+	drawMatrix(b);
 
 	linearRegression(A,x,b);
 	
