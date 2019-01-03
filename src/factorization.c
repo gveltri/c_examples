@@ -219,23 +219,23 @@ void hhReflectionsQR(Matrix A, Matrix QR[2], int debug)
 /*
   Gaussian Elimination
 
-  Given A and B, generate the reduced row echelon form (RREF)
+  Reduce A to row echelon form (eliminate lower triangle)
   Pivoting for improved precision
 
   @param A left side matrix to be reduced
-  @param B left side of block
-  @param RREF array of matrices to write reduced row form of A and B, [A^,B^]
+  @param B right side matrix or column vector
+  @param REF array of matrices to write row echelon form of A and B, [A^,B^]
   @param debug flag for printing matrices during iterations
 
 */
-void gaussianElimination(Matrix A, Matrix B, Matrix RREF[2], int debug)
+void gaussianElimination(Matrix A, Matrix B, Matrix REF[2], int debug)
 {
 	assert(A->n == A->m);
 	assert(A->n == B->n);
 
-	Matrix _A = RREF[0];
+	Matrix _A = REF[0];
 	copyMatrix(A, _A);
-	Matrix _B = RREF[1];
+	Matrix _B = REF[1];
 	copyMatrix(B, _B);
 
 	double max_pivot_value, scalar;
@@ -293,6 +293,48 @@ void gaussianElimination(Matrix A, Matrix B, Matrix RREF[2], int debug)
 			printf("ITERATION %d END\n", i);
 		}
 	}
+}
+
+/*
+  LU Decomposition
+
+  Reduce A to row echelon form (eliminate lower triangle)
+  Pivoting for improved precision
+
+  @param A left side matrix to be reduced
+  @param LU array of matrices to write lower and upper matrices to
+  @param debug flag for printing matrices during iterations
+
+*/
+void LUDecomposition(Matrix A, Matrix LU[2], int debug)
+{
+	assert(A->n == A->m);
+	Matrix I = allocMatrix(A->n, A->m);
+
+
+}
+
+/*
+  Gauss Jordan Elimination
+
+  Given A and B, generate the reduced row echelon form (RREF)
+  Pivoting for improved precision
+
+  @param A left side matrix to be reduced
+  @param B left side of block
+  @param RREF array of matrices to write reduced row form of A and B, [A^,B^]
+  @param debug flag for printing matrices during iterations
+
+*/
+void gaussJordanElimination(Matrix A, Matrix B, Matrix RREF[2], int debug)
+{
+
+	gaussianElimination(A, B, RREF, debug);
+
+	Matrix _A = RREF[0];
+	Matrix _B = RREF[1];
+	double scalar;
+	int iterations = min(A->n-1, A->m);
 
 	/* eliminate upper triangle  */
 	for (int i=iterations; i>0; i--)
