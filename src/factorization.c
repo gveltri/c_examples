@@ -217,6 +217,143 @@ void hhReflectionsQR(Matrix A, Matrix QR[2], int debug)
 }
 
 /*
+  LU Decomposition
+
+  Reduce A to row echelon form (eliminate lower triangle)
+
+  @param A left side matrix to be reduced
+  @param LU array of matrices to write lower and upper matrices to
+  @param debug flag for printing matrices during iterations
+
+*/
+void LUDecomposition(Matrix A, Matrix LU[2], int debug)
+{
+	assert(A->n == A->m);
+
+	Matrix _U = LU[0];
+	copyMatrix(A, _U);
+	Matrix _L = LU[1];
+	setMatrixValues(1, 'I', _L);
+
+	double scalar, neg_scalar;
+	int iterations = min(A->n-1, A->m);
+
+	/* eliminate lower triangle */
+	for (int i=0; i<iterations; i++)
+	{
+		if (debug)
+		{
+			printf("ITERATION %d BEGIN\n", i);
+		}
+
+		for (int j=i+1; j<A->n; j++)
+		{
+			
+			scalar = _U->values[j][i] / _U->values[i][i];
+			neg_scalar = scalar * -1;
+			if (_U->values[j][i] != 0)
+			{
+				addRowScalarMultiple(_U, j, neg_scalar, _U, i);
+				_L->values[j][i] = scalar;
+			}
+		}
+
+		if (debug)
+		{
+			printf("_U=\n");
+			drawMatrix(_U);
+			printf("_L=\n");
+			drawMatrix(_L);
+			printf("ITERATION %d END\n", i);
+		}
+	}
+}
+
+/*
+  LU Decomposition with Pivoting
+
+  PA = LU
+
+  Reduce A to row echelon form (eliminate lower triangle)
+  Pivoting for improved precision
+
+  @param A left side matrix to be reduced
+  @param PLU array of matrices to write pivot, lower and upper matrices to
+  @param debug flag for printing matrices during iterations
+
+*/
+void PLUDecomposition(Matrix A, Matrix PLU[3], int debug)
+{
+	assert(A->n == A->m);
+	
+	Matrix _U = PLU[2];
+	copyMatrix(A, _U);
+	Matrix _L = PLU[1];
+	setMatrixValues(1, 'I', _L);
+	Matrix _P = PLU[0];
+	setMatrixValues(1, 'I', _P);
+
+	double max_pivot_value, scalar, neg_scalar;
+	int max_pivot_index;
+	int iterations = min(A->n-1, A->m);
+
+	/* eliminate lower triangle */
+	for (int i=0; i<iterations; i++)
+	{
+		if (debug)
+		{
+			printf("ITERATION %d BEGIN\n", i);
+		}
+
+		/* pivoting */
+		max_pivot_value = _U->values[i][i];
+		max_pivot_index = i;
+		for (int j=i+1; j<_U->n; j++)
+		{
+			if (fabs(_U->values[j][i]) > max_pivot_value)
+			{
+				max_pivot_value = fabs(_U->values[j][i]);
+				max_pivot_index = j;
+			}
+		}
+    
+		if (max_pivot_index != 0)
+		{
+			switchRow(_U, i, max_pivot_index);
+			_P->values[i][i] = 0;
+			_P->values[max_pivot_index][i] = 1;
+		}
+
+		if (debug)
+		{
+			printf("row %d (%.5f) -> row %d\n", max_pivot_index, max_pivot_value, i);
+			drawMatrix(_U);
+		}
+
+		for (int j=i+1; j<A->n; j++)
+		{
+			
+			scalar = _U->values[j][i] / _U->values[i][i];
+			neg_scalar = scalar * -1;
+			if (_U->values[j][i] != 0)
+			{
+				addRowScalarMultiple(_U, j, neg_scalar, _U, i);
+				_L->values[j][i] = scalar;
+			}
+		}
+
+		if (debug)
+		{
+			printf("_U=\n");
+			drawMatrix(_U);
+			printf("_L=\n");
+			drawMatrix(_L);
+			printf("ITERATION %d END\n", i);
+		}
+	}
+}
+
+/*
   Gaussian Elimination
 
   Reduce A to row echelon form (eliminate lower triangle)
@@ -230,7 +367,6 @@ void hhReflectionsQR(Matrix A, Matrix QR[2], int debug)
 */
 void gaussianElimination(Matrix A, Matrix B, Matrix REF[2], int debug)
 {
-	assert(A->n == A->m);
 	assert(A->n == B->n);
 
 	Matrix _A = REF[0];
@@ -293,25 +429,6 @@ void gaussianElimination(Matrix A, Matrix B, Matrix REF[2], int debug)
 			printf("ITERATION %d END\n", i);
 		}
 	}
-}
-
-/*
-  LU Decomposition
-
-  Reduce A to row echelon form (eliminate lower triangle)
-  Pivoting for improved precision
-
-  @param A left side matrix to be reduced
-  @param LU array of matrices to write lower and upper matrices to
-  @param debug flag for printing matrices during iterations
-
-*/
-void LUDecomposition(Matrix A, Matrix LU[2], int debug)
-{
-	assert(A->n == A->m);
-	Matrix I = allocMatrix(A->n, A->m);
-
-
 }
 
 /*

@@ -12,7 +12,7 @@
 #include <estimation.h>
 #include <precision.h>
 
-const float SIZE_N = 20;
+const float SIZE_N = 5;
 const float SIZE_M = 4;
 const char METHOD = 'R';
 const float RANGE = 5;
@@ -25,7 +25,9 @@ void printHelp(char message[])
 		"---------\n\n"
 		"qrhh: QR factorization with Householder reduction\n"
 		"qrgs: QR factorization with Gram-Schmidt method\n"
-		"ge: Gaussian elimination with pivots\n"
+		"lu: LU factorization\n"
+		"plu: LU factorization with pivoting\n"
+		"gj: Gauss Jordan with pivots\n"
 		"bs: Back substitution\n"
 		"ols: Ordinary least squares\n\n"
 		"Options:\n"
@@ -79,7 +81,50 @@ void qr(char method, int debug)
 	freeMatrixStackAll(stackNxN);
 }
 
-void ge(int debug)
+void lu(int pivot, int debug)
+{
+	MatrixStack stack = allocMatrixStack(SIZE_N,SIZE_N,5);
+	Matrix A = popMatrixStack(stack);
+	setMatrixValues(RANGE, METHOD, A);
+
+	printf("A=\n");
+	drawMatrix(A);
+
+	if (pivot)
+	{
+		Matrix LU[] = {
+			popMatrixStack(stack),
+			popMatrixStack(stack),
+			popMatrixStack(stack)
+		};
+		PLUDecomposition(A, LU, debug);
+
+		printf("P=\n");
+		drawMatrix(LU[0]);
+
+		printf("L=\n");
+		drawMatrix(LU[1]);
+
+		printf("U=\n");
+		drawMatrix(LU[2]);
+	} else
+	{
+		Matrix LU[] = {
+			popMatrixStack(stack),
+			popMatrixStack(stack),
+		};
+		LUDecomposition(A, LU, debug);
+
+		printf("L=\n");
+		drawMatrix(LU[0]);
+
+		printf("U=\n");
+		drawMatrix(LU[1]);
+	}
+	
+}
+
+void gj(int debug)
 {
 	MatrixStack stack = allocMatrixStack(SIZE_N,SIZE_N,5);
 
@@ -99,7 +144,7 @@ void ge(int debug)
 	printf("B=\n");
 	drawMatrix(B);
 
-	gaussianElimination(A, B, RREF, debug);
+	gaussJordanElimination(A, B, RREF, debug);
 
 	printf("A^=\n");
 	drawMatrix(RREF[0]);
@@ -212,9 +257,17 @@ int main(int argc, char *argv[])
 	{
 		qr('g', debug);
 	}
-	else if (strcmp(argv[1], "ge") == 0)
+	else if (strcmp(argv[1], "lu") == 0)
 	{
-		ge(debug);
+		lu(0, debug);
+	}
+	else if (strcmp(argv[1], "plu") == 0)
+	{
+		lu(1, debug);
+	}
+	else if (strcmp(argv[1], "gj") == 0)
+	{
+		gj(debug);
 	}
 	else if (strcmp(argv[1], "bs") == 0)
 	{
