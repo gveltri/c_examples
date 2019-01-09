@@ -46,8 +46,6 @@ void qr(char method, int debug)
         Matrix _A = allocMatrix(SIZE_N, SIZE_M);
 
         setMatrixValues(RANGE, METHOD, A);
-        /* setMatrixValues(RANGE, METHOD, QR[0]); */
-        /* drawMatrix(QR[0]); */
 
         printf("A=\n");
         drawMatrix(A);

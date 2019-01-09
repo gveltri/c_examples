@@ -554,19 +554,24 @@ void multiplyMatrices(Matrix source1, int transpose1, Matrix source2, int transp
                         for (int k=0; k<iterations; k++)
                         {
                                 if (transpose1 & transpose2)
-                                        value = value			\
-                                                + (maccess(source1, k, i) * maccess(source2, j, k));
+                                        value = value +
+                                                (maccess(source1, k, i) *
+                                                   maccess(source2, j, k));
                                 else if (transpose1)
-                                        value = value			\
-                                                + (maccess(source1, k, i) * maccess(source2, k, j));
+                                        value = value +
+                                                (maccess(source1, k, i) *
+                                                 maccess(source2, k, j));
                                 else if (transpose2)
-                                        value = value			\
-                                                + (maccess(source1, i, k) * maccess(source2, j, k));
+                                        value = value +
+                                                (maccess(source1, i, k) *
+                                                 maccess(source2, j, k));
                                 else
-                                        value = value			\
-                                                + (maccess(source1, i, k) * maccess(source2, k, j));
+                                        value = value +
+                                                (maccess(source1, i, k) *
+                                                 maccess(source2, k, j));
                         }
-                        mset(target, i, j, value + (tscalar * maccess(target, i, j)));
+                        mset(target, i, j,
+                             value + (tscalar * maccess(target, i, j)));
                 }
         }
 }
