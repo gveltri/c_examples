@@ -555,16 +555,16 @@ void multiplyMatrices(Matrix source1, int transpose1, Matrix source2, int transp
                         {
                                 if (transpose1 & transpose2)
                                         value = value			\
-                                                + (maccess(source1, k, i) * maccess(source1, j, k));
+                                                + (maccess(source1, k, i) * maccess(source2, j, k));
                                 else if (transpose1)
                                         value = value			\
-                                                + (maccess(source1, k, i) * maccess(source1, k, j));
+                                                + (maccess(source1, k, i) * maccess(source2, k, j));
                                 else if (transpose2)
                                         value = value			\
-                                                + (maccess(source1, i, k) * maccess(source1, j, k));
+                                                + (maccess(source1, i, k) * maccess(source2, j, k));
                                 else
                                         value = value			\
-                                                + (maccess(source1, i, k) * maccess(source1, k, j));
+                                                + (maccess(source1, i, k) * maccess(source2, k, j));
                         }
                         mset(target, i, j, value + (tscalar * maccess(target, i, j)));
                 }
