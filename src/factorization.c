@@ -59,9 +59,10 @@ void gramSchmidtQR(Matrix A, Matrix QR[2], int debug)
 
                         if (debug)
                         {
-                                printf("ITERATION %d, %d", i, j);
+                                printf("Q-proji=\n");
                                 drawMatrix(Q);
                         }
+
                 }
 
                 normalizeColumn(Q, i);
