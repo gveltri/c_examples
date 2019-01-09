@@ -394,11 +394,11 @@ void normalizeColumn(Matrix matrix, int idx) {
         double _norm = norm('C', matrix, idx);
 
         /* if norm is zero, zero vector */
-        if (_norm != 0) 
+        if (_norm != 0)
                 scaleColumn(matrix, idx, 1/_norm);
 }
 
-/* 
+/*
    project
 
    project column vector of source 1 onto source 2 and save to column target[idx_t]
@@ -423,7 +423,7 @@ void simpleProject(Matrix source1, int idx1, Matrix source2, int idx2,
         scaleColumn(target, idx_t, st_dot);
 }
 
-/* 
+/*
 
    add scaled projection to matrix
    a faster, more efficient implementation of projection with scalar addition
