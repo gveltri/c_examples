@@ -6,6 +6,10 @@
 #ifndef MATRIX_HEADER
 #define MATRIX_HEADER
 
+double maccess(Matrix matrix, int i, int j);
+void mset(Matrix matrix, int i, int j, double value);
+
+
 void fillMatrix(double values[], Matrix matrix);
 void setMatrixValues(double value, char type, Matrix matrix);
 void copyMatrix(Matrix source, Matrix target);
