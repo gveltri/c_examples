@@ -1,15 +1,15 @@
 # Linalg
 
-Linalg is a lightweight numeric linear algebra CLI written in C. The core data structure of the library is the Matrix struct, which contains an array of pointers to doubles and size of the matrix, n and m.
+Linalg is a lightweight numeric linear algebra CLI written in C. The core data structure of the library is the Matrix struct, which contains an array of doubles and size of the matrix, n and m.
 
 mem.h
 ```
 typedef struct _Matrix_ {
 
-  int n; /* columns */
-  int m; /* rows */
+    int n; /* rows */
+    int m; /* columns */
 
-  double **values;
+    double *values;
 
 } *Matrix;
 ```
@@ -25,6 +25,11 @@ Decomposes an NxM matrix into an orthogonal Matrix, Q, and upper triangular matr
 * hhReflectionsQR: A = QR
 
 Decomposes an NxM matrix into an orthogonal Matrix, Q, and upper triangular matrix, R, using Householder reflections.
+
+* luDecomposition: A = LU
+
+Decomposes an NxM matrix into a lower matrix, L, and upper triangular matrix, U.
+
 
 * gaussianElimination: Ax = (B|b)
 
