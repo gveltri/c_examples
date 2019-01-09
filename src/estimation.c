@@ -73,7 +73,7 @@ void linearRegression(Matrix A, Matrix x, Matrix b)
 	copyMatrix(A, _A);
 	for (int i=0; i<_A->n; i++)
 	{
-		_A->values[i][_A->m-1] = 1;
+          mset(_A, i, _A->m-1, 1);
 	}
 
 	ordinaryLeastSquares(_A, x, b);

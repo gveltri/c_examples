@@ -8,22 +8,22 @@
 
 typedef struct _Matrix_ {
 
-  int n; /* columns */
-  int m; /* rows */
+    int n; /* rows */
+    int m; /* columns */
 
-  double **values;
+    double *values;
 
 } *Matrix;
 
 typedef struct _MatrixStack_ {
 
-  int n;
-  int m;
-  int depth;
-  int cur_depth;
+    int n;
+    int m;
+    int depth;
+    int cur_depth;
 
-  Matrix *top;
-  Matrix *matrices;
+    Matrix *top;
+    Matrix *matrices;
 
 } *MatrixStack;
 
