@@ -73,8 +73,8 @@ void qr(char method, int debug)
 
         double stats[2];
         matrixComparison(A, _A, stats);
-        printf("Mean Error = %.16f\n", stats[0]);
-        printf("Max Error = %.16f\n", stats[1]);
+        printf("Mean Error = %.16lf\n", stats[0]);
+        printf("Max Error = %.16lf\n", stats[1]);
 
         freeMatrix(A);
         freeMatrix(QR[0]);
@@ -162,8 +162,8 @@ void gj(int debug)
 
         double stats[2];
         identityPrecision(C, stats);
-        printf("Mean Error=%.16f\n", stats[0]);
-        printf("Max Error=%.16f\n", stats[1]);
+        printf("Mean Error=%.16lf\n", stats[0]);
+        printf("Max Error=%.16lf\n", stats[1]);
 
         freeMatrixStackAll(stack);
 }

@@ -13,18 +13,18 @@
 /* constants for rendering tables */
 const int PADDING = 1;
 const int PRECISION = 3;
-const char *FORMATTING  = "%.3f";
+const char *FORMATTING  = "%.3lf";
 
 double maccess(Matrix matrix, int i, int j)
 {
         /* for now, assume row oriented */
-        return matrix->values[(i* matrix->n)+ j];
+        return matrix->values[(i*(matrix->m))+ j];
 }
 
 void mset(Matrix matrix, int i, int j, double value)
 {
         /* for now, assume row oriented */
-        matrix->values[(i* matrix->n)+ j] = value;
+        matrix->values[(i*(matrix->m))+ j] = value;
 }
 
 void fillMatrix(double values[], Matrix matrix)
