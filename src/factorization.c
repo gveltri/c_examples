@@ -234,10 +234,12 @@ void LUDecomposition(Matrix A, Matrix LU[2], int debug)
 {
         assert(A->n == A->m);
 
-        Matrix _U = LU[0];
-        copyMatrix(A, _U);
-        Matrix _L = LU[1];
+        Matrix _L = LU[0];
         setMatrixValues(1, 'I', _L);
+
+        Matrix _U = LU[1];
+        copyMatrix(A, _U);
+
 
         double scalar, neg_scalar;
         int iterations = min(A->n-1, A->m);
@@ -289,12 +291,13 @@ void PLUDecomposition(Matrix A, Matrix PLU[3], int debug)
 {
         assert(A->n == A->m);
 
-        Matrix _U = PLU[2];
-        copyMatrix(A, _U);
-        Matrix _L = PLU[1];
-        setMatrixValues(1, 'I', _L);
         Matrix _P = PLU[0];
         setMatrixValues(1, 'I', _P);
+
+        Matrix _L = PLU[1];
+        setMatrixValues(1, 'I', _L);
+        Matrix _U = PLU[2];
+        copyMatrix(A, _U);
 
         double max_pivot_value, scalar, neg_scalar;
         int max_pivot_index;
@@ -320,11 +323,18 @@ void PLUDecomposition(Matrix A, Matrix PLU[3], int debug)
                         }
                 }
 
-                if (max_pivot_index != 0)
+                if (max_pivot_index != i)
                 {
                         switchRow(_U, i, max_pivot_index);
-                        mset(_P, i, i, 0);
-                        mset(_P, max_pivot_index, i, 1);
+                        switchRow(_P, i, max_pivot_index);
+
+                        for (int j=0; j<i; j++)
+                        {
+                                max_pivot_value = maccess(_L, max_pivot_index, j);
+                                mset(_L, max_pivot_index, j, maccess(_L, i, j));
+                                mset(_L, i, j, max_pivot_value);
+                        }
+
                 }
 
                 if (debug)
@@ -487,7 +497,7 @@ void gaussJordanElimination(Matrix A, Matrix B, Matrix RREF[2], int debug)
   Back Substitution
 
   solves Ax = b for x where A and b are given
-  
+
   @param A an upper triangular matrix
   @param b a column vector of values
   @param solution a column vector, x of Ax=b

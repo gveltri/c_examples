@@ -12,7 +12,7 @@
 #include <estimation.h>
 #include <precision.h>
 
-const int SIZE_N = 5;
+const int SIZE_N = 6;
 const int SIZE_M = 4;
 const char METHOD = 'R';
 const int RANGE = 5;
@@ -83,44 +83,61 @@ void qr(char method, int debug)
 
 void lu(int pivot, int debug)
 {
-        MatrixStack stack = allocMatrixStack(SIZE_N,SIZE_N,5);
+        MatrixStack stack = allocMatrixStack(SIZE_N,SIZE_N,6);
         Matrix A = popMatrixStack(stack);
+        Matrix _A = popMatrixStack(stack);
+
         setMatrixValues(RANGE, METHOD, A);
 
         printf("A=\n");
         drawMatrix(A);
 
+        Matrix PA;
+        Matrix LU[3];
+        LU[0] = popMatrixStack(stack);
+        LU[1] = popMatrixStack(stack);
+
         if (pivot)
         {
-                Matrix LU[] = {
-                        popMatrixStack(stack),
-                        popMatrixStack(stack),
-                        popMatrixStack(stack)
-                };
+
+                LU[2] = popMatrixStack(stack);
+                PA = popMatrixStack(stack);
+
                 PLUDecomposition(A, LU, debug);
 
                 printf("P=\n");
                 drawMatrix(LU[0]);
 
-                printf("L=\n");
-                drawMatrix(LU[1]);
+                multiplyMatrices(LU[0], 0, A, 0, PA, 0);
 
-                printf("U=\n");
-                drawMatrix(LU[2]);
+                printf("PA=\n");
+                drawMatrix(PA);
+
         } else
         {
-                Matrix LU[] = {
-                        popMatrixStack(stack),
-                        popMatrixStack(stack),
-                };
                 LUDecomposition(A, LU, debug);
 
-                printf("L=\n");
-                drawMatrix(LU[0]);
-
-                printf("U=\n");
-                drawMatrix(LU[1]);
+                PA = A;
         }
+        pivot = !pivot;
+
+        printf("L=\n");
+        drawMatrix(LU[1-pivot]);
+
+        printf("U=\n");
+        drawMatrix(LU[2-pivot]);
+
+        multiplyMatrices(LU[1-pivot], 0, LU[2-pivot], 0, _A, 0);
+
+        printf("_A=\n");
+        drawMatrix(_A);
+
+        double stats[2];
+        matrixComparison(PA, _A, stats);
+        printf("Mean Error = %.16lf\n", stats[0]);
+        printf("Max Error = %.16lf\n", stats[1]);
+
+        freeMatrixStack(stack);
 
 }
 
@@ -196,13 +213,20 @@ void bs()
 
         backSubstitution(A, solution, b);
 
+        printf("A=\n");
         drawMatrix(A);
+        printf("B=\n");
         drawMatrix(b);
+        printf("solution=\n");
         drawMatrix(solution);
         simpleMultiplyMatrices(A, solution, _b);
+        printf("A(solution)=\n");
         drawMatrix(_b);
-        subtractMatrix(_b, b);
-        drawMatrix(_b);
+
+        double stats[2];
+        matrixComparison(_b, b, stats);
+        printf("Mean Error=%.16lf\n", stats[0]);
+        printf("Max Error=%.16lf\n", stats[1]);
 
         freeMatrix(A);
         freeMatrixStackAll(stack);
